@@ -3,50 +3,54 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<title>Ludo Offline & Online</title>
+<title>Ludo Cash - TV & Mobile</title>
 <style>
 :root{--ink:#2a1470}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
-html,body{margin:0;height:100%;overflow:hidden;font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;color:#fff;background:radial-gradient(circle at 50% -10%,#7a3cff,#2a1470 60%,#160a40)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;color:#fff;background:radial-gradient(circle at 50% -10%,#7a3cff,#2a1470 60%,#160a40);-webkit-user-select:none;user-select:none}
 
-/* ---- Screen containers (Optimized for 1GB TV RAM: no heavy offscreen GPU layers) ---- */
-.screen{position:absolute;inset:0;padding:calc(68px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom));display:none;flex-direction:column;gap:12px;overflow-y:auto;align-items:center}
-.screen::before,.screen::after{content:"";flex:1 0 0}
+/* Inactive screens completely hidden so they NEVER block TV clicks */
+.screen{position:absolute;inset:0;padding:calc(66px + env(safe-area-inset-top)) 14px 14px;display:none;flex-direction:column;gap:12px;overflow-y:auto;align-items:center}
+.screen::before,.screen::after{content:"";flex:1 0 0;pointer-events:none}
 .screen>*{width:min(100%,clamp(340px,48vmin,720px))}
-body[data-s=menu] #menu,body[data-s=setup] #setup,body[data-s=search] #search,body[data-s=game] #game{display:flex}
+body[data-s=menu] #menu{display:flex !important}
+body[data-s=setup] #setup{display:flex !important}
+body[data-s=search] #search{display:flex !important}
+body[data-s=game] #game{display:flex !important}
 
-h1{margin:6px 0 0;text-align:center;font-size:42px;text-shadow:0 4px 0 #b3122a,0 8px 0 #5b0a1a,0 12px 14px #0008;animation:pop 2.4s ease-in-out infinite}
-@keyframes pop{50%{transform:scale(1.05) rotate(-1deg)}}
-.sub{text-align:center;margin:-4px 0 0;font-weight:700;opacity:.85}
+h1{margin:4px 0 0;text-align:center;font-size:40px;text-shadow:0 4px 0 #b3122a,0 8px 0 #5b0a1a,0 12px 14px #0008;animation:pop 2.4s ease-in-out infinite}
+@keyframes pop{50%{transform:scale(1.04) rotate(-1deg)}}
+.sub{text-align:center;margin:-4px 0 0;font-weight:700;opacity:.88}
 
-/* TV & Low RAM Optimized Cards (No heavy backdrop-filter blur) */
-.card{background:#ffffffee;color:var(--ink);border-radius:24px;padding:14px;box-shadow:0 6px 0 #b9a8ef,0 12px 22px #0006,inset 0 2px 0 #fff}
+/* TV Optimized Lightweight Cards (No blur to save 1GB RAM) */
+.card{background:#ffffff;color:var(--ink);border-radius:24px;padding:14px;box-shadow:0 6px 0 #b9a8ef,0 12px 22px rgba(0,0,0,0.4);border:2px solid #fff}
 .card h3{margin:0 0 8px;font-size:15px}
 .chips{display:flex;gap:8px}.chips button{flex:1}
-.chip{border:0;border-radius:16px;padding:12px 4px;font:900 17px inherit;color:var(--ink);background:#e4dcff;box-shadow:0 4px 0 #b9a8ef;transition:.15s;cursor:pointer}
-.chip.on{background:linear-gradient(#ffd23f,#ff9500);color:#fff;box-shadow:0 4px 0 #b45a00;transform:translateY(-2px)}
+.chip{border:0;border-radius:16px;padding:12px 4px;font:900 17px inherit;color:var(--ink);background:#e4dcff;box-shadow:0 4px 0 #b9a8ef;cursor:pointer;pointer-events:auto !important}
+.chip.on{background:linear-gradient(#ffd23f,#ff9500);color:#fff;box-shadow:0 4px 0 #b45a00}
 .seat{display:flex;gap:8px;align-items:center;margin-top:8px}
 .seat.hide{display:none}
 .dot{width:30px;height:30px;border-radius:50%;flex:none;box-shadow:inset -4px -5px 0 #0003,0 3px 0 #0003}
 input,select{border:3px solid #d9ceff;border-radius:14px;padding:10px;font:700 16px inherit;color:var(--ink);background:#fff;min-width:0;outline:none}
 .seat input{flex:1}
 
-.btn{border:0;border-radius:22px;padding:16px;font:900 22px inherit;color:#fff;background:linear-gradient(#ffd23f,#ff8a00);box-shadow:0 7px 0 #b45a00,0 14px 20px #0007;text-shadow:0 2px 0 #b45a00;position:relative;overflow:hidden;cursor:pointer}
+/* TV Clickable Buttons */
+.btn{border:0;border-radius:22px;padding:16px;font:900 22px inherit;color:#fff;background:linear-gradient(#ffd23f,#ff8a00);box-shadow:0 7px 0 #b45a00,0 14px 20px rgba(0,0,0,0.4);text-shadow:0 2px 0 #b45a00;position:relative;cursor:pointer;touch-action:manipulation;pointer-events:auto !important}
 .btn:active{transform:translateY(4px);box-shadow:0 2px 0 #b45a00}
-.btn::after{content:"";position:absolute;left:8%;right:8%;top:5px;height:36%;border-radius:20px;background:#fff5}
-.btn.go{background:linear-gradient(#5dff7a,#12a63a);box-shadow:0 7px 0 #0a6a24,0 14px 20px #0007;text-shadow:0 2px 0 #0a6a24}
-.btn.sm{padding:9px 12px;font-size:14px;border-radius:16px;box-shadow:0 4px 0 #b45a00}
+.btn::after{content:"";position:absolute;left:8%;right:8%;top:5px;height:36%;border-radius:20px;background:#fff5;pointer-events:none !important}
+.btn.go{background:linear-gradient(#5dff7a,#12a63a);box-shadow:0 7px 0 #0a6a24,0 14px 20px rgba(0,0,0,0.4);text-shadow:0 2px 0 #0a6a24}
+.btn.sm{padding:9px 14px;font-size:14px;border-radius:16px;box-shadow:0 4px 0 #b45a00}
 
-/* TV Remote Focus Highlight Ring */
-:focus-visible,button:focus,input:focus,select:focus,#dice:focus{outline:4px solid #ffd23f !important;outline-offset:2px;box-shadow:0 0 16px #ffd23f !important}
+/* TV Remote Focus Highlight */
+:focus,button:focus,input:focus,select:focus,#dice:focus{outline:4px solid #ffd23f !important;outline-offset:2px;box-shadow:0 0 16px #ffd23f !important}
 
-.pill{background:rgba(0,0,0,0.45);border-radius:20px;padding:6px 12px;font-weight:900;box-shadow:inset 0 2px 0 #fff3}
+.pill{background:rgba(0,0,0,0.45);border-radius:20px;padding:6px 12px;font-weight:900}
 #top{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap}
 #badge{display:flex;align-items:center;gap:8px}
 #badge i{width:18px;height:18px;border-radius:50%;box-shadow:inset -2px -3px 0 #0004}
 
 /* Board & Tokens */
-.tok{transition:transform .17s ease-in-out;cursor:pointer}
+.tok{cursor:pointer;pointer-events:auto !important}
 .can .in{animation:hop .45s ease-in-out infinite alternate}
 @keyframes hop{to{transform:translateY(-8px) scale(1.15)}}
 .in{transform-box:fill-box;transform-origin:center}
@@ -54,34 +58,31 @@ input,select{border:3px solid #d9ceff;border-radius:14px;padding:10px;font:700 1
 .can .ring{opacity:1;animation:spin 3s linear infinite;transform-box:fill-box;transform-origin:center}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* Remote Selected Token */
-.tok.sel .in{filter:drop-shadow(0 0 6px #ffd23f) drop-shadow(0 0 10px #fff);transform:scale(1.22)}
-.tok.sel .ring{opacity:1 !important;stroke:#ffd23f !important;stroke-width:5 !important;animation:spin 1.2s linear infinite}
+.tok.sel .in{filter:drop-shadow(0 0 8px #ffd23f) drop-shadow(0 0 12px #fff);transform:scale(1.2)}
+.tok.sel .ring{opacity:1 !important;stroke:#ffd23f !important;stroke-width:5 !important;animation:spin 1s linear infinite}
 
-/* Toast Message */
-#toast{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(0);background:#241a4b;color:#fff;padding:12px 22px;border-radius:18px;font-weight:900;font-size:16px;border:2px solid #ffd23f;box-shadow:0 6px 20px #000a;transition:transform .2s ease-out;pointer-events:none;white-space:nowrap;z-index:90}
+/* Centered Screen Toast */
+#toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:#241a4b;color:#fff;padding:12px 24px;border-radius:20px;font-weight:900;font-size:16px;border:3px solid #ffd23f;box-shadow:0 10px 30px rgba(0,0,0,0.8);transition:transform .2s cubic-bezier(.2,1.4,.4,1);pointer-events:none;white-space:nowrap;z-index:999999}
 #toast.on{transform:translate(-50%,-50%) scale(1)}
 
-/* FIXED MODAL: Screen ke beech me lock rahega, side me nahi ghusega */
-#modal{position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;padding:16px;z-index:9999}
+/* 100% ROCK SOLID CENTERED MODAL FOR TV (No Side Sliding) */
+#modal{position:fixed !important;top:0 !important;left:0 !important;right:0 !important;bottom:0 !important;width:100vw !important;height:100vh !important;background:rgba(0,0,0,0.85) !important;display:none !important;align-items:center !important;justify-content:center !important;z-index:99999 !important;margin:0 !important;padding:16px !important}
 #modal.on{display:flex !important}
-#modal .card{width:92%;max-width:380px;text-align:center;box-shadow:0 10px 30px #000c;animation:popIn .25s ease-out}
-@keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+#modal .card{width:90% !important;max-width:380px !important;margin:auto !important;text-align:center !important;box-shadow:0 12px 40px rgba(0,0,0,0.9) !important;transform:none !important;animation:none !important}
 
 #pod{display:flex;align-items:flex-end;justify-content:center;gap:6px;margin:10px 0 14px;height:160px}
 .pd{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;font-weight:900;font-size:13px}
-.pd b{display:block;width:100%;border-radius:14px 14px 0 0;padding-top:8px;color:#fff;font-size:24px;text-shadow:0 2px 0 #0004;box-shadow:inset 0 3px 0 #fff6,0 4px 0 #0003}
-.cf{position:absolute;top:-20px;font-size:22px;animation:fall linear forwards;z-index:10000;pointer-events:none}
+.pd b{display:block;width:100%;border-radius:14px 14px 0 0;padding-top:8px;color:#fff;font-size:24px;text-shadow:0 2px 0 #0004}
+.cf{position:fixed;top:-20px;font-size:22px;animation:fall linear forwards;z-index:100000;pointer-events:none}
 @keyframes fall{to{transform:translateY(105vh) rotate(540deg)}}
 
-/* Game Layout */
 #game{padding-left:8px;padding-right:8px;gap:8px;--bs:min(100vw - 16px,100dvh - 365px,720px)}
 #game #bw,#game>.prow,#game>#top,#game>#say{width:var(--bs)}
 .prow{display:flex;gap:8px;flex:none}
-.pp{flex:1;min-width:0;display:flex;align-items:center;gap:4px;padding:6px 8px;border-radius:20px;background:rgba(255,255,255,0.14);border:2px solid rgba(255,255,255,0.2);box-shadow:0 4px 0 #0004;transition:.2s;--c:#fff}
+.pp{flex:1;min-width:0;display:flex;align-items:center;gap:4px;padding:6px 8px;border-radius:20px;background:rgba(255,255,255,0.16);border:2px solid rgba(255,255,255,0.22);box-shadow:0 4px 0 #0004;--c:#fff}
 .pp.rev{flex-direction:row-reverse;text-align:right}
 .pp.off{visibility:hidden}
-.pp.turn{border-color:var(--c);background:rgba(255,255,255,0.3);box-shadow:0 0 0 2px #fff,0 0 16px var(--c)}
+.pp.turn{border-color:var(--c);background:rgba(255,255,255,0.32);box-shadow:0 0 0 2px #fff,0 0 16px var(--c)}
 .pp.fin{opacity:.65}
 .inf{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;font-size:12px;font-weight:900}
 .inf b{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -92,21 +93,21 @@ input,select{border:3px solid #d9ceff;border-radius:14px;padding:10px;font:700 1
 #say{flex:none;text-align:center;font-weight:900;font-size:16px;min-height:22px;text-shadow:0 2px 0 #0006}
 
 /* 3D Dice */
-#dice{width:56px;height:56px;perspective:320px;position:relative;cursor:pointer;outline:none}
-#dice::before{content:"";position:absolute;inset:-5px;border-radius:18px;opacity:0;transition:.2s;pointer-events:none}
+#dice{width:56px;height:56px;perspective:320px;position:relative;cursor:pointer;outline:none;pointer-events:auto !important}
+#dice::before{content:"";position:absolute;inset:-5px;border-radius:18px;opacity:0;pointer-events:none}
 #dice.ready::before{opacity:1;background:#ffd23f55;box-shadow:0 0 18px 4px #ffd23f}
 #dice::after{content:"";position:absolute;left:8%;right:8%;bottom:-9px;height:8px;border-radius:50%;background:#0006;filter:blur(3px);pointer-events:none}
-#dice.jump{animation:jump .9s}
-@keyframes jump{30%{transform:translateY(-20px) scale(1.15)}60%{transform:translateY(0) scale(.95)}80%{transform:translateY(-4px)}100%{transform:none}}
+#dice.jump{animation:jump .85s}
+@keyframes jump{30%{transform:translateY(-20px) scale(1.15)}60%{transform:translateY(0) scale(.95)}100%{transform:none}}
 #cube{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .85s cubic-bezier(.15,.7,.2,1)}
 .f{position:absolute;inset:0;border-radius:11px;display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:7px;background:linear-gradient(145deg,#fff,#d4cbee);border:2px solid #aaa0d8;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .f i{margin:auto;width:10px;height:10px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#666,#111);opacity:0}
 .f i.on{opacity:1}
 .f.o i.on{background:radial-gradient(circle at 35% 30%,#ff8a94,#d0102a);width:13px;height:13px}
 
-#hdr{position:absolute;top:0;left:0;right:0;z-index:15;display:flex;justify-content:center;gap:18px;align-items:center;padding:calc(8px + env(safe-area-inset-top)) 12px 8px;background:linear-gradient(#5b2bd6,#3b1a9c);box-shadow:0 5px 0 #1e0b5e,0 10px 16px #0006}
+#hdr{position:absolute;top:0;left:0;right:0;z-index:15;display:flex;justify-content:center;gap:18px;align-items:center;padding:calc(8px + env(safe-area-inset-top)) 12px 8px;background:linear-gradient(#5b2bd6,#3b1a9c);box-shadow:0 5px 0 #1e0b5e,0 10px 16px rgba(0,0,0,0.4)}
 .logo{font:900 24px inherit;letter-spacing:1px;text-shadow:0 3px 0 #b3122a,0 5px 0 #5b0a1a}
-.wal{display:flex;align-items:center;gap:6px;background:linear-gradient(#ffd23f,#ff9500);color:#5a2a00;border-radius:18px;padding:5px 12px;box-shadow:0 4px 0 #b45a00,inset 0 2px 0 #fff8;font-weight:900;line-height:1.05}
+.wal{display:flex;align-items:center;gap:6px;background:linear-gradient(#ffd23f,#ff9500);color:#5a2a00;border-radius:18px;padding:5px 12px;box-shadow:0 4px 0 #b45a00;font-weight:900;line-height:1.05}
 .wal small{display:block;font-size:10px}.wal b{font-size:18px}
 .mc{text-align:center}.mc p{margin:6px 0 12px;font-weight:700;font-size:13px}
 .info{display:flex;gap:10px;margin:8px 0}.info div{flex:1;background:#e4dcff;border-radius:16px;padding:8px;box-shadow:inset 0 -4px 0 #b9a8ef}
@@ -117,8 +118,8 @@ input,select{border:3px solid #d9ceff;border-radius:14px;padding:10px;font:700 1
 .col{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%}
 .vs{display:flex;align-items:center;justify-content:center;gap:18px}.vs>b{font-size:36px;text-shadow:0 3px 0 #b3122a}
 .vs>div{display:flex;flex-direction:column;align-items:center;gap:8px;width:130px}
-.av{width:90px;height:90px;border-radius:50%;display:grid;place-items:center;font-size:48px;background:linear-gradient(#fff,#cfc3ff);box-shadow:0 6px 0 #6a4fc4,0 12px 18px #0007;border:4px solid #ffd23f}
-.pid{font-weight:900;font-size:15px;background:#0005;border-radius:14px;padding:4px 10px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.av{width:90px;height:90px;border-radius:50%;display:grid;place-items:center;font-size:48px;background:linear-gradient(#fff,#cfc3ff);box-shadow:0 6px 0 #6a4fc4,0 12px 18px rgba(0,0,0,0.5);border:4px solid #ffd23f}
+.pid{font-weight:900;font-size:15px;background:rgba(0,0,0,0.5);border-radius:14px;padding:4px 10px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -136,7 +137,7 @@ input,select{border:3px solid #d9ceff;border-radius:14px;padding:10px;font:700 1
   </div>
   <div class="card mc">
     <h3>👥 Offline</h3>
-    <p>Play with friends on this TV / phone</p>
+    <p>Play with friends on this TV</p>
     <button class="btn" id="offl" style="width:100%" tabindex="0">Offline (Pass &amp; Play)</button>
   </div>
 </section>
@@ -185,12 +186,13 @@ input,select{border:3px solid #d9ceff;border-radius:14px;padding:10px;font:700 1
   <div class="prow" id="ptop"></div>
   <div id="bw">
     <svg id="svg" viewBox="0 0 600 600"></svg>
-    <div id="toast"></div>
   </div>
   <div class="prow" id="pbot"></div>
-  <div id="say">Tap or press OK to roll!</div>
+  <div id="say">Tap or press OK on remote to roll!</div>
   <div id="stash" hidden><div id="dice" role="button" tabindex="0" aria-label="Roll dice"></div></div>
 </section>
+
+<div id="toast"></div>
 
 <div id="modal">
   <div class="card">
@@ -212,19 +214,20 @@ const YARD={red:[0,0],green:[9,0],yellow:[9,9],blue:[0,9]},SLOT=[[1.9,1.9],[4.1,
 const FIN={red:[6.8,7.5],green:[7.5,6.8],yellow:[8.2,7.5],blue:[7.5,8.2]};
 let mode=4,G=null,busy=false,tick=0,tokEl={},cfg=[];
 
-/* ---------- Lightweight Audio (TV Safe) ---------- */
+/* Audio */
 let AC;const au=()=>{if(!AC){const AudioCtx=window.AudioContext||window.webkitAudioContext;if(AudioCtx)AC=new AudioCtx()}return AC};
 function tone(f,d,t='sine',v=.15,at=0,f2){try{const a=au();if(!a)return;const o=a.createOscillator(),g=a.createGain(),s=a.currentTime+at;o.type=t;o.frequency.setValueAtTime(f,s);if(f2)o.frequency.exponentialRampToValueAtTime(f2,s+d);g.gain.setValueAtTime(v,s);g.gain.exponentialRampToValueAtTime(.001,s+d);o.connect(g);g.connect(a.destination);o.start(s);o.stop(s+d)}catch(e){}}
-const snd={roll(){for(let i=0;i<6;i++)tone(150+Math.random()*350,.04,'square',.05,i*.06)},move(){tone(520,.08,'triangle',.18,0,820)},cut(){tone(520,.35,'sawtooth',.16,0,60)},home(){[660,880,1100].forEach((f,i)=>tone(f,.14,'triangle',.18,i*.09))},win(){[523,659,784,1046].forEach((f,i)=>tone(f,.25,'triangle',.2,i*.14))}};
+const snd={roll(){for(let i=0;i<5;i++)tone(160+Math.random()*300,.04,'square',.05,i*.06)},move(){tone(520,.08,'triangle',.18,0,820)},cut(){tone(520,.35,'sawtooth',.16,0,60)},home(){[660,880,1100].forEach((f,i)=>tone(f,.14,'triangle',.18,i*.09))},win(){[523,659,784,1046].forEach((f,i)=>tone(f,.25,'triangle',.2,i*.14))}};
 
-/* ---------- Setup Screen ---------- */
+/* Setup Screen */
 document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{mode=+b.dataset.m;document.querySelectorAll('[data-m]').forEach(x=>x.classList.toggle('on',x==b));seatVis()});
 C.forEach(c=>{const d=document.createElement('div');d.className='seat';d.dataset.c=c;d.innerHTML=`<span class="dot" style="background:${HEX[c]}"></span><input maxlength="10" tabindex="0" placeholder="${c[0].toUpperCase()+c.slice(1)}"><select tabindex="0"><option value="h">Human</option><option value="ai">Computer (AI)</option></select>`;d.querySelector('select').value=c=='red'?'h':'ai';$('#seats').appendChild(d)});
 function seatVis(){document.querySelectorAll('.seat').forEach(s=>s.classList.toggle('hide',mode==2&&(s.dataset.c=='green'||s.dataset.c=='blue')))}seatVis();
+
 $('#start').onclick=()=>{try{au()&&au().resume()}catch(e){}
  cfg=[...document.querySelectorAll('.seat:not(.hide)')].map(s=>({color:s.dataset.c,name:s.querySelector('input').value.trim()||s.dataset.c[0].toUpperCase()+s.dataset.c.slice(1),ai:s.querySelector('select').value=='ai'}));ON=false;newGame()};
 
-/* ---------- Engine ---------- */
+/* Game Engine */
 const cur=()=>G?G.players.find(p=>p.color==G.turn):null;
 const track=(c,p)=>p>=1&&p<=51?(START[c]+p-1)%52:null;
 function movable(){if(!G||G.dice==null)return[];const d=G.dice;return G.tokens[G.turn].map((p,i)=>(p==0?d==6:p+d<=FINISH)?i:-1).filter(i=>i>=0)}
@@ -239,7 +242,7 @@ function doMove(i){const c=G.turn,d=G.dice,t=G.tokens[c],from=t[i],to=from==0?1:
  return{color:c,token:i,from,to,cap}}
 function aiPick(){const c=G.turn,d=G.dice;return movable().map(i=>{const p=G.tokens[c][i],n=p==0?1:p+d,a=track(c,n);let s=p;if(n==FINISH)s+=100;if(a!==null&&!SAFE.has(a)&&G.order.some(o=>o!=c&&G.tokens[o].some(q=>track(o,q)===a)))s+=80;if(p==0)s+=50;if(SAFE.has(a))s+=10;return[s,i]}).sort((x,y)=>y[0]-x[0])[0][1]}
 
-/* ---------- Board SVG Drawing ---------- */
+/* Board SVG */
 function drawBoard(){let h='<defs>'+C.map(c=>`<radialGradient id="g${c}" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff"/><stop offset=".25" stop-color="${HEX[c]}"/><stop offset="1" stop-color="${DK[c]}"/></radialGradient>`).join('')+'</defs>';
  C.forEach(c=>{const[x,y]=YARD[c];h+=`<rect x="${x*S+2}" y="${y*S+2}" width="${6*S-4}" height="${6*S-4}" rx="22" fill="${HEX[c]}" stroke="${DK[c]}" stroke-width="4"/><rect x="${(x+1)*S}" y="${(y+1)*S}" width="${4*S}" height="${4*S}" rx="26" fill="#fff" opacity=".95"/>`;SLOT.forEach(([a,b])=>h+=`<circle cx="${(x+a)*S}" cy="${(y+b)*S}" r="${S*.62}" fill="${HEX[c]}" opacity=".28"/>`)});
  const cell=(x,y,f)=>`<rect x="${x*S+1.5}" y="${y*S+4.5}" width="${S-3}" height="${S-3}" rx="9" fill="#0004"/><rect x="${x*S+1.5}" y="${y*S+1.5}" width="${S-3}" height="${S-3.5}" rx="9" fill="${f}" stroke="#ffffffaa" stroke-width="1.5"/><rect x="${x*S+6}" y="${y*S+4}" width="${S-12}" height="5" rx="2.5" fill="#fff" opacity=".35"/>`;
@@ -269,7 +272,7 @@ function render(){if(!G)return;const groups={},pl=!cur().ai&&!G.over&&mine();
 function toast(m,ms=1100){const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),ms)}
 const say=m=>$('#say').textContent=m;
 
-/* ---------- 3D Dice ---------- */
+/* 3D Dice */
 const PIPS={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
 const FT={1:'',2:'rotateY(90deg)',3:'rotateX(90deg)',4:'rotateX(-90deg)',5:'rotateY(-90deg)',6:'rotateY(180deg)'};
 const ROT={1:[0,0],2:[0,-90],3:[-90,0],4:[90,0],5:[0,90],6:[0,180]};
@@ -286,13 +289,12 @@ function panels(){G.players.forEach(p=>{const e=$('#pp-'+p.color),h=G.tokens[p.c
  const sl=$('#sl-'+G.turn),d=$('#dice');if(sl&&d.parentNode!==sl)sl.appendChild(d);d.classList.toggle('ready',!G.over&&!cur().ai&&mine()&&G.dice==null&&!busy);
  const t=cur();$('#badge').innerHTML=`<i style="background:${HEX[t.color]}"></i><b>${t.name=='You'?'Your turn':t.name+"'s turn"}</b>`}
 
-/* ---------- Game Flow ---------- */
 function newGame(){const order=cfg.map(p=>p.color);G={players:cfg.map(p=>({...p})),order,tokens:Object.fromEntries(order.map(c=>[c,[0,0,0,0]])),turn:order[0],dice:null,sixes:0,finished:[],over:false,score:Object.fromEntries(order.map(c=>[c,0])),online:ON};
  show('game');$('#restart').style.display=ON?'none':'';$('#tmr').style.display=ON?'':'none';$('#modal').classList.remove('on');drawBoard();buildPanels();faceTo(1,false);tick++;busy=false;next()}
 
 async function next(){if(!G)return;const id=++tick;render();if(G.over)return win();const p=cur();
  if(p.ai){say(p.name+' is thinking…');await sleep(850);if(id!==tick)return;return aiTurn(id)}
- if(G.dice==null){if(mine()){say(p.name+': Tap or press OK to roll!');$('#dice').classList.add('ready')}else say("Opponent's turn…")}else say(mine()?'Select token to move':'Opponent is moving…')}
+ if(G.dice==null){if(mine()){say(p.name+': Click or press OK on remote to roll!');$('#dice').classList.add('ready')}else say("Opponent's turn…")}else say(mine()?'Select token to move':'Opponent is moving…')}
 
 async function turnRoll(){const g=G,r=doRoll();if(g.online)send({t:"roll",d:r.d});await rollAnim(r.d);if(g!==G)return null;if(r.passed){toast(r.f?'Three 6s! Turn lost':'No move possible');await sleep(800)}return r}
 
@@ -311,7 +313,6 @@ async function playMove(r){const el=tokEl[r.color][r.token],g=G;$('#tk').appendC
  if(g!==G)return;if(r.cap.length){snd.cut();toast('Captured! ✂️')}else if(r.to==FINISH){snd.home();toast('Token home! 🏠')}
  render();await sleep(300)}
 
-/* ---------- Victory & Popup (Centered) ---------- */
 function confetti(){for(let i=0;i<25;i++){const e=document.createElement('div');e.className='cf';e.textContent=['🎉','⭐','🏆','✨'][i%4];e.style.left=Math.random()*100+'vw';e.style.animationDuration=2+Math.random()*2+'s';e.style.animationDelay=Math.random()*1+'s';document.body.appendChild(e);setTimeout(()=>e.remove(),5000)}}
 
 function win(){if(G.shown)return;G.shown=1;if(!G.online)return winOff();clearInterval(tmr);
@@ -330,14 +331,13 @@ $('#again').onclick=()=>ON?toSetup():newGame();$('#tosetup').onclick=toSetup;
 $('#restart').onclick=()=>{if(confirm('Restart this match?'))newGame()};
 $('#back').onclick=()=>{if(confirm(ON?'Leave the match? You will lose the entry fee.':'Leave this match?')){if(G&&G.online&&!G.over&&mref)mref.child('left').set(my);toSetup()}};
 
-/* ---------- Wallet & Realtime Matchmaking ---------- */
+/* Wallet & Realtime Matchmaking */
 const firebaseConfig={apiKey:"AIzaSyCt3W96wZhdnbX2NiWiMFERQVXeFIdxyp0",authDomain:"my-game-7da3b.firebaseapp.com",databaseURL:"https://my-game-7da3b-default-rtdb.firebaseio.com",projectId:"my-game-7da3b",storageBucket:"my-game-7da3b.firebasestorage.app",messagingSenderId:"628106631481",appId:"1:628106631481:web:338fe45a9939cdcb09b0e8",measurementId:"G-VJ6V9W5XX6"};
 const FEE=10,PRIZE=18,DUR=600000;
 const AV=['🦊','🐯','🐼','🦁','🐸','🐵','🦄','🐲','🐧','🐻'];
 let ME;try{ME=JSON.parse(localStorage.me)}catch(e){}
 if(!ME||!AV.includes(ME.a)){ME={a:AV[Math.floor(Math.random()*AV.length)],n:'Player'+(1000+Math.floor(Math.random()*9000))};try{localStorage.me=JSON.stringify(ME)}catch(e){}}
 
-/* Clean name without breaking Hindi/Unicode/TV characters */
 const clean=x=>String(x||'').trim().slice(0,14)||'Player',cav=x=>AV.includes(x)?x:'🙂';
 let db,off=0,ON=false,my,mref,T0,tmr,searching=false,searchT,q=Promise.resolve(),wallet=150,uid;
 
@@ -346,13 +346,15 @@ try{if(localStorage.wallet!=null)wallet=+localStorage.wallet;uid=localStorage.ui
 
 const setW=n=>{wallet=n;try{localStorage.wallet=n}catch(e){}$('#wal').textContent='₹'+n};
 
-function show(x){document.body.dataset.s=x;
+function show(x){
+ document.body.dataset.s=x;
  setTimeout(()=>{
   if(x=='menu')$('#onl').focus();
   else if(x=='setup')$('#start').focus();
   else if(x=='search')$('#cancel').focus();
   else if(x=='game')$('#dice').focus();
- },60)}
+ },60);
+}
 
 const mine=()=>!G.online||G.turn==my;
 const send=e=>{if(mref)mref.child('events').push({...e,by:my})};
@@ -374,10 +376,10 @@ async function findMatch(){try{au()&&au().resume()}catch(e){}
 function cancelSearch(){if(!searching)return;searching=false;clearTimeout(searchT);
  db.ref('queue/matched/'+uid).off();db.ref('queue/waiting').transaction(c=>c&&c.uid===uid?null:c);db.ref('queue/waiting').onDisconnect().cancel();setW(wallet+FEE);show('menu')}
 
-async function begin(id,col){searching=false;clearTimeout(searchT);db.ref('queue/waiting').onDisconnect().cancel();
+async function begin(id,col){
+ searching=false;clearTimeout(searchT);db.ref('queue/waiting').onDisconnect().cancel();
  my=col;mref=db.ref('matches/'+id);
  
- /* Realtime Safe Opponent Fetch: Wait until Firebase record exists */
  let m=(await mref.once('value')).val();
  if(!m){m=await new Promise(res=>{const h=mref.on('value',s=>{if(s.val()){mref.off('value',h);res(s.val())}});setTimeout(()=>res(null),4000)})}
  if(!m){alert('Match initialization failed. Refunded.');return cancelSearch()}
@@ -411,7 +413,27 @@ $('#onl').onclick=findMatch;$('#cancel').onclick=cancelSearch;
 $('#offl').onclick=()=>show('setup');$('#sback').onclick=()=>show('menu');
 setW(wallet);
 
-/* ---------- TV REMOTE & KEYBOARD FULL NAVIGATION ENGINE ---------- */
+/* ================= TV AIR-MOUSE & REMOTE CLICK FIX ================= */
+// Prevents Android TV gyroscopic tremor / shaky hands from dropping clicks
+let pDownX=0,pDownY=0,pDownT=0,pTarget=null,lastTrigger=0;
+document.addEventListener('pointerdown',e=>{
+ pDownX=e.clientX;pDownY=e.clientY;pDownT=Date.now();
+ pTarget=e.target.closest('button, .btn, .chip, .tok, #dice, [tabindex="0"]');
+},{passive:true});
+
+document.addEventListener('pointerup',e=>{
+ if(!pTarget)return;
+ const dx=Math.abs(e.clientX-pDownX),dy=Math.abs(e.clientY-pDownY),dt=Date.now()-pDownT;
+ if(dx<35&&dy<35&&dt<750){
+  if(Date.now()-lastTrigger>200){
+   lastTrigger=Date.now();
+   pTarget.click();
+  }
+ }
+ pTarget=null;
+});
+
+/* ================= TV REMOTE D-PAD NAVIGATION ================= */
 let sel=0;
 function selUpdate(){if(!G||!tokEl.red)return;const mv=mine()&&G.dice!=null&&!G.over?movable():[];
  if(G.dice==null||sel>=mv.length)sel=0;
@@ -420,11 +442,10 @@ function selUpdate(){if(!G||!tokEl.red)return;const mv=mine()&&G.dice!=null&&!G.
 window.addEventListener('keydown',e=>{
  try{au()&&au().resume()}catch(err){}
  const k=e.key,c=e.keyCode;
- const isOK=(k==='Enter'||k===' '||k==='Select'||c===13||c===65385);
+ const isOK=(k==='Enter'||k===' '||k==='Select'||c===13||c===23||c===66||c===65385);
  const isBack=(k==='Escape'||k==='Back'||k==='GoBack'||c===27||c===10009||c===461||c===8);
  const isLeft=(k==='ArrowLeft'||c===37),isRight=(k==='ArrowRight'||c===39),isUp=(k==='ArrowUp'||c===38),isDown=(k==='ArrowDown'||c===40);
 
- /* Back button on Smart TV Remotes */
  if(isBack){
   e.preventDefault();
   if($('#modal').classList.contains('on'))return toSetup();
@@ -434,12 +455,10 @@ window.addEventListener('keydown',e=>{
   return;
  }
 
- /* Victory Modal TV Navigation */
  if($('#modal').classList.contains('on')){
   if(isOK){
    e.preventDefault();
-   const active=document.activeElement;
-   if(active===$('#tosetup'))toSetup();else $('#again').click();
+   if(document.activeElement===$('#tosetup'))toSetup();else $('#again').click();
   }else if(isUp||isDown){
    e.preventDefault();
    if(document.activeElement===$('#again'))$('#tosetup').focus();else $('#again').focus();
@@ -447,7 +466,6 @@ window.addEventListener('keydown',e=>{
   return;
  }
 
- /* Game screen remote control: Roll dice & Move tokens */
  if(document.body.dataset.s==='game'){
   if(!G||G.over||busy||cur().ai||!mine())return;
   if(G.dice==null){
@@ -463,14 +481,12 @@ window.addEventListener('keydown',e=>{
   return;
  }
 
- /* D-Pad navigation on Menu & Setup */
  if(isOK){
   const el=document.activeElement;
   if(el&&typeof el.click==='function')el.click();
  }
 });
 
-/* Initial launch focus for TV */
 show('menu');
 </script>
 </body>
