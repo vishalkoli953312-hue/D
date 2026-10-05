@@ -89,6 +89,23 @@ input,select{border:3px solid #d9ceff;border-radius:14px;padding:10px;font:700 1
 #search{align-items:center;justify-content:center;text-align:center;gap:18px}
 .spin{width:96px;height:96px;border-radius:50%;border:12px solid #ffffff33;border-top-color:#ffd23f;animation:spin 1s linear infinite}
 #tmr{font-variant-numeric:tabular-nums}
+
+/* ---- responsive centered layout: mobile / desktop / TV ---- */
+.screen{align-items:center}
+.screen::before,.screen::after{content:"";flex:1 0 0}
+.screen>*{width:min(100%,clamp(340px,48vmin,720px))}
+#hdr{justify-content:center;gap:18px}
+#game{--bs:min(100vw - 16px,100dvh - 365px,760px)}
+#game #bw{width:var(--bs)}
+#game>.prow,#game>#top,#game>#say{width:var(--bs)}
+#top{justify-content:center;gap:10px;flex-wrap:wrap}
+.col{display:flex;flex-direction:column;align-items:center;gap:18px;width:100%}
+.vs{display:flex;align-items:center;justify-content:center;gap:18px}.vs>b{font-size:36px;text-shadow:0 3px 0 #b3122a}
+.vs>div{display:flex;flex-direction:column;align-items:center;gap:8px;width:130px}
+.av{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;font-size:54px;background:linear-gradient(#fff,#cfc3ff);box-shadow:0 6px 0 #6a4fc4,0 12px 18px #0007,inset 0 3px 0 #fff;border:4px solid #ffd23f}
+.pid{font-weight:900;font-size:15px;background:#0005;border-radius:14px;padding:4px 10px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tok{transition:transform .17s ease-in-out}
+.sel .in{filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 9px #ffd23f)}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script></head><body data-s="menu">
 <header id="hdr"><span class="logo">LUDO CASH</span><span class="wal">💰<span><small>Wallet Balance</small><b id="wal">₹150</b></span></span></header>
@@ -98,7 +115,10 @@ input,select{border:3px solid #d9ceff;border-radius:14px;padding:10px;font:700 1
   <div class="card mc"><h3>⚡ Play Online · Quick Match</h3><div class="info"><div><small>Entry Fee</small><b>₹10</b></div><div><small>Winning Amount</small><b class="gold">₹18</b></div></div><p>2 players · 10 minutes · highest score wins</p><button class="btn go" id="onl" style="width:100%">Play Online</button></div>
   <div class="card mc"><h3>👥 Offline</h3><p>Play with friends on this phone</p><button class="btn" id="offl" style="width:100%">Offline (Pass &amp; Play)</button></div>
 </section>
-<section id="search" class="screen"><div class="spin"></div><h2 style="margin:0">Searching for opponent…</h2><p class="sub">Entry ₹10 · Prize ₹18</p><button class="btn sm" id="cancel">Cancel</button></section>
+<section id="search" class="screen">
+<div id="srch" class="col"><div class="spin"></div><h2 style="margin:0">Searching for opponent…</h2><p class="sub">Entry ₹10 · Prize ₹18</p><button class="btn sm" id="cancel">Cancel</button></div>
+<div id="found" class="col" style="display:none"><h2 style="margin:0">✅ Match Found!</h2><div class="vs"><div><span class="av" id="av1"></span><span class="pid" id="id1"></span></div><b>VS</b><div><span class="av" id="av2"></span><span class="pid" id="id2"></span></div></div><p class="sub">Starting game…</p></div>
+</section>
 <section id="setup" class="screen">
   <button class="btn sm" id="sback" style="align-self:flex-start">← Menu</button><p class="sub">Offline match · pass &amp; play</p>
   <div class="card"><h3>Mode</h3><div class="chips"><button class="chip" data-m="2">2 Players</button><button class="chip on" data-m="4">4 Players</button></div></div>
@@ -172,11 +192,11 @@ function drawBoard(){let h='<defs>'+C.map(c=>`<radialGradient id="g${c}" cx=".35
 function posOf(c,i,p){if(p==0){const[a,b]=SLOT[i];return[YARD[c][0]+a,YARD[c][1]+b]}
  if(p<=51){const[x,y]=PATH[(START[c]+p-1)%52];return[x+.5,y+.5]}
  if(p<57){const[x,y]=HOME[c][p-52];return[x+.5,y+.5]}return FIN[c]}
-const place=(el,[x,y])=>el.style.transform=`translate(${x*S}px,${y*S}px)`;
+const place=(el,[x,y],k=1)=>el.style.transform=`translate(${x*S}px,${y*S}px) scale(${k})`;
 function render(){const groups={},pl=!cur().ai&&!G.over&&mine();
  G.order.forEach(c=>G.tokens[c].forEach((p,i)=>{const pos=posOf(c,i,p),k=pos.join();(groups[k]=groups[k]||[]).push([c,i,pos])}));
  C.forEach(c=>tokEl[c].forEach(e=>e.style.display=G.order.includes(c)?'':'none'));
- Object.values(groups).forEach(g=>g.forEach(([c,i,pos],k)=>{let[x,y]=pos;if(g.length>1){const a=k/g.length*6.283;x+=Math.cos(a)*.2;y+=Math.sin(a)*.2}place(tokEl[c][i],[x,y])}));
+ Object.values(groups).forEach(g=>g.forEach(([c,i,pos],k)=>{let[x,y]=pos;if(g.length>1){const a=k/g.length*6.283;x+=Math.cos(a)*.2;y+=Math.sin(a)*.2}place(tokEl[c][i],[x,y],g.length>1?.8:1)}));
  const mv=pl?movable():[];C.forEach(c=>tokEl[c].forEach((e,i)=>e.classList.toggle('can',pl&&G.turn==c&&mv.includes(i))));
  panels();if(G.dice!=null)faceTo(G.dice,false)}
 function toast(m,ms=1100){const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),ms)}
@@ -237,6 +257,10 @@ $('#back').onclick=()=>{if(confirm(ON?'Leave the match? You will lose the entry 
 /* ================= WALLET + FIREBASE ONLINE ================= */
 const firebaseConfig={apiKey:"AIzaSyCt3W96wZhdnbX2NiWiMFERQVXeFIdxyp0",authDomain:"my-game-7da3b.firebaseapp.com",databaseURL:"https://my-game-7da3b-default-rtdb.firebaseio.com",projectId:"my-game-7da3b",storageBucket:"my-game-7da3b.firebasestorage.app",messagingSenderId:"628106631481",appId:"1:628106631481:web:338fe45a9939cdcb09b0e8",measurementId:"G-VJ6V9W5XX6"};
 const FEE=10,PRIZE=18,DUR=600000;
+const AV=['🦊','🐯','🐼','🦁','🐸','🐵','🦄','🐲','🐧','🐻'];
+let ME;try{ME=JSON.parse(localStorage.me)}catch(e){}
+if(!ME||!AV.includes(ME.a)){ME={a:AV[Math.floor(Math.random()*AV.length)],n:'Player'+(1000+Math.floor(Math.random()*9000))};try{localStorage.me=JSON.stringify(ME)}catch(e){}}
+const clean=x=>String(x||'').replace(/[^\w]/g,'').slice(0,12)||'Player',cav=x=>AV.includes(x)?x:'🙂';
 let db,off=0,ON=false,my,mref,T0,tmr,searching=false,searchT,q=Promise.resolve(),wallet=150,uid;
 try{firebase.initializeApp(firebaseConfig);db=firebase.database();db.ref('.info/serverTimeOffset').on('value',x=>off=x.val()||0)}catch(e){}
 try{if(localStorage.wallet!=null)wallet=+localStorage.wallet;uid=localStorage.uid||(localStorage.uid='u'+Math.random().toString(36).slice(2,10))}catch(e){uid=uid||'u'+Math.random().toString(36).slice(2,10)}
@@ -248,13 +272,13 @@ const send=e=>mref.child('events').push({...e,by:my});   // background write: lo
 async function findMatch(){try{au().resume()}catch(e){}
  if(!db)return alert('Firebase failed to load. Check your internet.');
  if(wallet<FEE)return alert('Not enough balance for the ₹'+FEE+' entry fee.');
- setW(wallet-FEE);searching=true;show('search');
+ setW(wallet-FEE);searching=true;$('#srch').style.display='';$('#found').style.display='none';show('search');
  const wr=db.ref('queue/waiting'),inbox=db.ref('queue/matched/'+uid);let hit=null;
  inbox.on('value',x=>{if(x.val()&&searching){inbox.off();inbox.remove();begin(x.val(),'red')}});   // I was waiting; someone joined me
- try{await wr.transaction(c=>{hit=null;if(c&&c.uid!==uid&&Date.now()+off-c.t<35000){hit=c;return null}return{uid,t:Date.now()+off}});
+ try{await wr.transaction(c=>{hit=null;if(c&&c.uid!==uid&&Date.now()+off-c.t<35000){hit=c;return null}return{uid,t:Date.now()+off,n:ME.n,a:ME.a}});
   if(!searching)return;
   if(hit){inbox.off();const id=db.ref('matches').push().key;
-   await db.ref('matches/'+id).set({p1:hit.uid,p2:uid,start:firebase.database.ServerValue.TIMESTAMP});
+   await db.ref('matches/'+id).set({p1:hit.uid,p2:uid,n1:hit.n||'Player',a1:hit.a||'',n2:ME.n,a2:ME.a,start:firebase.database.ServerValue.TIMESTAMP});
    await db.ref('queue/matched/'+hit.uid).set(id);begin(id,'yellow')}
   else{wr.onDisconnect().remove();searchT=setTimeout(()=>{alert('No opponent found. Entry fee refunded.');cancelSearch()},30000)}
  }catch(e){alert('Connection error.');cancelSearch()}}
@@ -262,13 +286,18 @@ function cancelSearch(){if(!searching)return;searching=false;clearTimeout(search
  db.ref('queue/matched/'+uid).off();wr.transaction(c=>c&&c.uid===uid?null:c);wr.onDisconnect().cancel();setW(wallet+FEE);show('menu')}
 
 async function begin(id,col){searching=false;clearTimeout(searchT);db.ref('queue/waiting').onDisconnect().cancel();
- my=col;mref=db.ref('matches/'+id);T0=(await mref.child('start').once('value')).val();
- cfg=['red','yellow'].map(c=>({color:c,name:c==my?'You':'Opponent'}));ON=true;newGame();startTimer();
+ my=col;mref=db.ref('matches/'+id);const m=(await mref.once('value')).val();T0=m.start+1600;
+ const opp=col=='red'?{n:clean(m.n2),a:cav(m.a2)}:{n:clean(m.n1),a:cav(m.a1)};
+ $('#srch').style.display='none';$('#found').style.display='';
+ $('#av1').textContent=ME.a;$('#av2').textContent=opp.a;$('#id1').textContent='You · '+ME.n;$('#id2').textContent=opp.n;
+ cfg=['red','yellow'].map(c=>({color:c,name:c==my?'You':opp.a+' '+opp.n}));
+ await sleep(1600);if(!mref)return;ON=true;newGame();startTimer();
  mref.child('events').on('child_added',x=>{const e=x.val();if(e.by!==my)q=q.then(()=>remote(e))});
  mref.child('left').onDisconnect().set(my);
  mref.child('left').on('value',x=>{const v=x.val();if(v&&v!==my&&G&&G.online&&!G.over){G.forfeit=1;G.over=true;tick++;win()}})}
 
-async function remote(e){const g=G;if(!g||g.over)return;
+async function remote(e){const g=G;if(!g||g.over||g.turn==my)return;
+ if(e.t=='roll'?!(g.dice==null&&e.d>=1&&e.d<=6&&e.d%1==0):!(e.t=='move'&&movable().includes(e.i)))return;   // reject invalid/out-of-turn events
  if(e.t=='roll'){const r=doRoll(e.d);await rollAnim(r.d);if(g!==G)return;if(r.passed){toast(r.f?'Three 6s! Turn lost':'No move possible');await sleep(850)}}
  else if(e.t=='move'){const r=doMove(e.i);await playMove(r);if(g!==G)return}
  next()}
@@ -281,4 +310,15 @@ function startTimer(){clearInterval(tmr);const el=$('#tmr');
 $('#onl').onclick=findMatch;$('#cancel').onclick=cancelSearch;
 $('#offl').onclick=()=>show('setup');$('#sback').onclick=()=>show('menu');
 setW(wallet);
+
+/* ---- TV remote / keyboard: Arrows = pick token, Enter/Space = roll or move ---- */
+let sel=0;
+function selUpdate(){if(!G||!tokEl.red)return;const mv=mine()&&G.dice!=null&&!G.over?movable():[];if(G.dice==null||sel>=mv.length)sel=0;
+ C.forEach(c=>tokEl[c].forEach((e,i)=>e.classList.toggle('sel',G.turn==c&&mv.length>1&&mv[sel]==i)))}
+{const r0=render;render=function(){r0();selUpdate()}}
+addEventListener('keydown',e=>{if(!G||G.over||document.body.dataset.s!='game'||busy||cur().ai||!mine())return;const k=e.key;
+ if(G.dice==null){if(k==' '||k=='Enter'){e.preventDefault();$('#dice').click()}return}
+ const mv=movable(),n=mv.length;if(!n)return;
+ if(k=='ArrowRight'||k=='ArrowDown'){sel=(sel+1)%n;selUpdate()}else if(k=='ArrowLeft'||k=='ArrowUp'){sel=(sel+n-1)%n;selUpdate()}
+ else if(k==' '||k=='Enter'){e.preventDefault();tap(G.turn,mv[sel]??mv[0])}});
 </script></body></html>
