@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Casho Ludo – Register / Login</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--gold:#ffc83d;--yellow:#fff04d;--green:#22e66b;--red:#ff2d55}
+html,body{min-height:100%}
+body{font-family:'Trebuchet MS',Verdana,sans-serif;color:#fff;overflow-x:hidden;background:#14063f;padding:0 14px;height:var(--H,100dvh);overflow:hidden}
+html{overflow:hidden}html.kb,html.kb body{overflow-y:auto}
+
+/* Background & Space */
+.bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;perspective:900px;background:radial-gradient(circle at 20% 10%,#2f46ff 0,transparent 45%),radial-gradient(circle at 85% 90%,#8e24ff 0,transparent 50%),linear-gradient(160deg,#0b1060,#2a0a6e 60%,#14063f)}
+
+/* Twinkling Stars in Background */
+.star{position:absolute;border-radius:50%;background:#fff;box-shadow:0 0 6px 1px #fff,0 0 12px 2px #ffc83d;animation:starTwinkle var(--d,3s) ease-in-out infinite}
+@keyframes starTwinkle{
+  0%,100%{opacity:.15;transform:scale(.5)}
+  50%{opacity:1;transform:scale(1.25)}
+}
+
+/* 3D Rotating Dice for Sides */
+.cube{position:absolute;width:42px;height:42px;transform-style:preserve-3d;animation:spin 12s linear infinite}
+.cube i{position:absolute;inset:0;background:linear-gradient(135deg,#fff,#dfe6ff);border:2px solid #fff;border-radius:9px;display:grid;place-items:center;color:var(--red);font:900 20px Arial;font-style:normal;box-shadow:inset 0 0 8px rgba(0,0,0,.25),0 0 10px rgba(255,200,61,.3)}
+.cube i:nth-child(1){transform:translateZ(21px)}.cube i:nth-child(2){transform:rotateY(90deg) translateZ(21px)}
+.cube i:nth-child(3){transform:rotateY(180deg) translateZ(21px)}.cube i:nth-child(4){transform:rotateY(-90deg) translateZ(21px)}
+.cube i:nth-child(5){transform:rotateX(90deg) translateZ(21px)}.cube i:nth-child(6){transform:rotateX(-90deg) translateZ(21px)}
+
+/* Side Floating Animations for Dice */
+.cw-left{position:absolute;left:3%;top:18%;animation:driftLeft 8s ease-in-out infinite;z-index:1}
+.cw-right{position:absolute;right:3%;top:24%;animation:driftRight 9s ease-in-out infinite;z-index:1}
+.cw-left2{position:absolute;left:5%;top:50%;animation:driftLeft2 10s ease-in-out infinite;z-index:1}
+.cw-right2{position:absolute;right:5%;top:58%;animation:driftRight2 8.5s ease-in-out infinite;z-index:1}
+
+@keyframes driftLeft{0%,100%{transform:translate(0,0) rotate(-6deg)}50%{transform:translate(14px,-38px) rotate(14deg)}}
+@keyframes driftRight{0%,100%{transform:translate(0,0) rotate(6deg)}50%{transform:translate(-14px,-42px) rotate(-14deg)}}
+@keyframes driftLeft2{0%,100%{transform:translate(0,0) rotate(8deg)}50%{transform:translate(12px,32px) rotate(-10deg)}}
+@keyframes driftRight2{0%,100%{transform:translate(0,0) rotate(-8deg)}50%{transform:translate(-12px,36px) rotate(10deg)}}
+@keyframes spin{to{transform:rotateX(360deg) rotateY(720deg)}}
+
+/* Tokens */
+.tok{position:absolute;width:32px;height:32px;border-radius:50%;animation:drift 7s ease-in-out infinite;background:radial-gradient(circle at 35% 30%,#fff9 0,transparent 35%),var(--c);box-shadow:0 8px 0 rgba(0,0,0,.35),0 0 24px var(--c);border:3px solid rgba(255,255,255,.7)}
+.tok:after{content:"";position:absolute;inset:6px;border-radius:50%;border:2px solid rgba(255,255,255,.8)}
+@keyframes drift{50%{transform:translateY(-30px)}}
+
+.wrap{position:relative;z-index:1;max-width:440px;margin:0 auto;height:var(--H,100dvh);display:flex;flex-direction:column}
+
+/* Badge popup slightly elevated */
+.badge{position:absolute;top:-6px;left:50%;transform:translate(-50%,-50%);z-index:5;white-space:nowrap;display:flex;align-items:center;gap:8px;padding:7px 16px 7px 8px;border-radius:30px;font-size:11px;font-weight:800;letter-spacing:.6px;color:#ffeaa6;cursor:pointer;background:linear-gradient(180deg,rgba(60,30,120,.95),rgba(20,8,70,.98));border:1.5px solid transparent;background-clip:padding-box;box-shadow:0 0 0 1.5px #ffc83d,0 8px 20px rgba(0,0,0,.5),0 0 18px rgba(255,200,61,.5);overflow:hidden}
+.badge:after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,235,160,.5),transparent);transform:skewX(-20deg);will-change:transform;animation:sweep2 3.4s ease-in-out infinite}
+.badge i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:13px;background:linear-gradient(180deg,#fff7a8,#ffc83d 55%,#e08a00);box-shadow:inset 0 1px 0 #fff}
+.badge b{color:#fff;font-weight:900}
+
+/* Hero Section */
+.hero{position:relative;margin:0 -14px;height:calc(var(--bs,100vw)*.74);flex:none}
+.aura{position:absolute;left:50%;top:calc(var(--bs,100vw)*-.16);width:var(--bs,100vw);height:var(--bs,100vw);margin-left:calc(var(--bs,100vw)/-2);border-radius:50%;background:radial-gradient(circle at 18% 25%,rgba(255,45,85,.7),transparent 42%),radial-gradient(circle at 82% 25%,rgba(255,200,61,.7),transparent 42%),radial-gradient(circle at 20% 80%,rgba(34,230,107,.6),transparent 42%),radial-gradient(circle at 80% 80%,rgba(61,123,255,.7),transparent 42%);animation:breathe 3.4s ease-in-out infinite;will-change:opacity}
+@keyframes breathe{0%,100%{opacity:.45}50%{opacity:.95}}
+.stage{position:absolute;left:50%;top:calc(var(--bs,100vw)*-.16);width:var(--bs,100vw);height:var(--bs,100vw);margin-left:calc(var(--bs,100vw)/-2);transform-origin:50% 50%;animation:tilt 7s ease-in-out infinite;will-change:transform}
+@keyframes tilt{0%,100%{transform:translateY(-8px) scale(1.07)}50%{transform:translateY(-14px) scale(1.09)}}
+.board{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 14px rgba(255,216,77,.65)) drop-shadow(0 14px 10px rgba(0,0,0,.5))}
+.shine{position:absolute;inset:0;pointer-events:none;overflow:hidden;-webkit-mask:url(https://i.ibb.co/6J0xSd4t/file-00000000435881faa031a06b327e2d1c.png) center/contain no-repeat;mask:url(https://i.ibb.co/6J0xSd4t/file-00000000435881faa031a06b327e2d1c.png) center/contain no-repeat}
+.shine:after{content:"";position:absolute;top:0;left:-50%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.85),transparent);animation:sheen 3.2s ease-in-out infinite;will-change:transform}
+@keyframes sheen{from{transform:translateX(0)}to{transform:translateX(450%)}}
+
+/* Circular glowing lens gleams (NO STAR SHAPE) */
+.gleam{position:absolute;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle,#ffffff 15%,rgba(255,230,120,.95) 45%,rgba(255,200,61,0) 70%);box-shadow:0 0 14px 4px rgba(255,225,120,.9),0 0 28px 8px rgba(255,180,50,.5);animation:gleamPulse 2.6s ease-in-out infinite;opacity:0;pointer-events:none;z-index:3}
+@keyframes gleamPulse{0%,100%{opacity:0;transform:scale(.3)}50%{opacity:1;transform:scale(1.35)}}
+
+/* Dice position slightly lowered */
+.dice{position:absolute;width:28%;aspect-ratio:1;object-fit:contain;left:36%;top:13%;z-index:4;animation:bob 2.4s ease-in-out infinite;filter:drop-shadow(0 8px 5px rgba(0,0,0,.5));will-change:transform}
+.dshadow{position:absolute;left:39%;top:43%;width:22%;height:4%;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.7),transparent 70%);z-index:3;animation:dsh 2.4s ease-in-out infinite;will-change:transform,opacity}
+@keyframes dsh{0%,100%{transform:scale(.75);opacity:.4}50%{transform:scale(1.05);opacity:.85}}
+@keyframes bob{0%,100%{transform:perspective(520px) translateY(-6px) rotateY(-28deg) rotateX(12deg) rotateZ(-4deg)}50%{transform:perspective(520px) translateY(6px) rotateY(28deg) rotateX(-8deg) rotateZ(4deg)}}
+
+.typing{text-align:center;min-height:22px;margin:0 0 10px;font-size:16px;white-space:nowrap;overflow:hidden;font-weight:700;color:#b9ffd2;text-shadow:0 0 10px var(--green)}
+.typing:after{content:"|";animation:blink .7s steps(1) infinite;color:var(--yellow)}
+@keyframes blink{50%{opacity:0}}
+
+/* Bottom Card / Popup raised slightly */
+.card{position:relative;z-index:2;margin:-10px -14px 0;border-radius:30px 30px 0 0;background:linear-gradient(160deg,#3d31c4,#1a0a66);border:2px solid rgba(255,214,90,.6);border-bottom:0;box-shadow:0 -8px 30px rgba(255,200,61,.35),inset 0 2px 0 rgba(255,255,255,.35);padding:30px 18px calc(16px + env(safe-area-inset-bottom,0px))}
+
+.tabs{position:relative;display:grid;grid-template-columns:1fr 1fr;background:rgba(10,5,50,.55);border-radius:40px;padding:5px;margin-bottom:12px;box-shadow:inset 0 4px 10px rgba(0,0,0,.5)}
+.tabs button{position:relative;z-index:2;background:none;border:0;color:#cfd3ff;font:800 16px 'Trebuchet MS';padding:11px;cursor:pointer;transition:color .2s}
+.tabs button.on{color:#4a2500;text-shadow:0 1px 0 #fff8}
+.pill{position:absolute;z-index:1;top:5px;bottom:5px;left:5px;width:calc(50% - 5px);border-radius:35px;background:linear-gradient(180deg,#fff7a8,var(--gold) 55%,#e58a00);box-shadow:0 4px 0 #a35a00,0 0 18px rgba(255,200,61,.8),inset 0 2px 0 #fff;transition:transform .3s cubic-bezier(.4,1.4,.4,1)}
+.pill.r{transform:translateX(100%)}
+
+/* Smooth Form Transition without Double Reload */
+.form{display:none;opacity:0}
+.form.on{display:block;animation:fadeQuick .22s ease-out forwards}
+@keyframes fadeQuick{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.f{position:relative;margin-bottom:10px}
+.f input{width:100%;padding:13px 12px 13px 46px;font-size:16px;border-radius:15px;border:2px solid rgba(255,255,255,.25);background:rgba(8,4,60,.55);color:#fff;font-family:'Trebuchet MS';outline:0;transition:border-color .25s,box-shadow .25s;box-shadow:inset 0 3px 8px rgba(0,0,0,.4)}
+.f input::placeholder{color:#9aa0e6}
+.f input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(34,230,107,.25),0 0 18px rgba(34,230,107,.5)}
+.f input.bad{border-color:var(--red);animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:24px;height:24px;display:grid;place-items:center;color:var(--gold);filter:drop-shadow(0 0 5px var(--gold))}
+.ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.f.ph input{padding-left:88px}
+.ph .ic{width:auto;left:8px;filter:none}
+.flag{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.16);padding:4px 7px;border-radius:9px;font-size:12px;font-weight:800;color:#fff}
+.fl{width:16px;height:11px;border-radius:2px;background:linear-gradient(#ff9933 33%,#fff 33% 66%,#138808 66%);position:relative;box-shadow:0 0 0 1px #0004}
+.fl:after{content:"";position:absolute;left:6px;top:3.5px;width:4px;height:4px;border-radius:50%;border:1px solid #000080}
+.eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:34px;height:34px;border:0;border-radius:10px;cursor:pointer;color:#fff;background:linear-gradient(180deg,#6f7bff,#3a3fd1);box-shadow:0 3px 0 #1a1c80;display:grid;place-items:center;transition:.15s}
+.eye:active{transform:translateY(-48%);box-shadow:0 1px 0 #1a1c80}
+.eye svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.eye .slash{display:none}.eye.show .slash{display:block}
+.f.pw input{padding-right:56px}
+
+.promo{position:relative;margin:2px 0 12px;padding:10px;border-radius:18px;background:linear-gradient(135deg,rgba(255,200,61,.28),rgba(255,45,85,.22));border:2px dashed var(--gold);box-shadow:0 0 18px rgba(255,200,61,.45)}
+.promo label{display:block;font-size:11px;font-weight:900;color:var(--yellow);margin-bottom:6px;letter-spacing:.4px}
+.promo .in{display:flex;gap:8px}
+.promo input{flex:1;min-width:0;padding:10px;font-size:15px;border-radius:12px;border:2px solid rgba(255,255,255,.3);background:rgba(8,4,60,.65);color:var(--yellow);font-weight:800;font-family:'Trebuchet MS';text-transform:uppercase;letter-spacing:2px;outline:0}
+.promo input.bad{border-color:var(--red);animation:shake .4s}
+.apply{border:0;border-radius:12px;padding:0 14px;font:900 13px 'Trebuchet MS';color:#fff;cursor:pointer;background:linear-gradient(180deg,#ff6b8a,var(--red) 55%,#b0002a);box-shadow:0 4px 0 #6d0019,0 0 16px var(--red)}
+.apply:active{transform:translateY(3px);box-shadow:0 1px 0 #6d0019}
+
+.cta{width:100%;border:0;border-radius:14px;padding:12px 14px;font:900 17px 'Trebuchet MS';letter-spacing:1px;cursor:pointer;position:relative;overflow:hidden;transition:transform .12s}
+.cta:after{content:"";position:absolute;top:0;left:-70%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);transform:skewX(-20deg);will-change:transform;animation:sweep2 2.4s infinite}
+@keyframes sweep2{to{transform:translateX(450%) skewX(-20deg)}}
+.gold{color:#5a2c00;background:linear-gradient(180deg,#fff7a8,var(--gold) 50%,#e58a00);box-shadow:0 6px 0 #9a5200,0 12px 20px rgba(0,0,0,.45),0 0 24px rgba(255,200,61,.8),inset 0 2px 0 #fff;text-shadow:0 1px 0 #fff9;animation:pulse 1.8s infinite}
+.green{color:#fff;background:linear-gradient(180deg,#8dffb4,var(--green) 50%,#0a9a43);box-shadow:0 6px 0 #07672d,0 12px 20px rgba(0,0,0,.45),0 0 24px rgba(34,230,107,.85),inset 0 2px 0 #d8ffe6;text-shadow:0 2px 0 #07672d;animation:pulse 1.8s infinite}
+@keyframes pulse{50%{transform:scale(1.025)}}
+.cta:active{transform:translateY(4px) scale(.99)}
+.forgot{display:block;text-align:right;margin:0 2px 14px;font-size:14px;font-weight:800;color:var(--yellow);text-decoration:none}
+.note{text-align:center;margin-top:10px;font-size:12px;color:#c9ccff}
+
+#toasts{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:50;width:min(92vw,380px);display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.toast{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:20px;font-weight:900;font-size:14px;color:#fff;border:3px solid #fff;animation:pop .6s cubic-bezier(.3,1.8,.5,1) both;box-shadow:0 8px 0 rgba(0,0,0,.35),0 0 26px var(--t)}
+.toast.out{animation:out .4s forwards}
+.toast .e{width:38px;height:38px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:20px;flex:none}
+.toast.ok{--t:#14b955;background:linear-gradient(180deg,#5dfc97,#14b955)}
+.toast.promo{--t:#e08a00;background:linear-gradient(180deg,#ffe36b,#f0a000);color:#5a2c00}
+.toast.err{--t:#e0002f;background:linear-gradient(180deg,#ff6b88,#e0002f)}
+.toast small{display:block;font-weight:700;opacity:.9;font-size:12px}
+@keyframes pop{from{transform:scale(.3) translateY(-40px);opacity:0}}
+@keyframes out{to{transform:translateY(-30px) scale(.8);opacity:0}}
+</style>
+</head>
+<body>
+<div class="bg" id="bg"></div>
+<div id="toasts"></div>
+
+<div class="wrap" id="wrap">
+  <div class="hero">
+    <div class="aura"></div>
+    <div class="stage">
+      <img class="board" src="https://i.ibb.co/6J0xSd4t/file-00000000435881faa031a06b327e2d1c.png" alt="Ludo Board">
+      <div class="shine"></div>
+      
+      <!-- Circular Glowing Lens Shines (No star shape) -->
+      <i class="gleam" style="left:10%;top:12%"></i>
+      <i class="gleam" style="right:10%;top:16%;animation-delay:.9s"></i>
+      <i class="gleam" style="left:16%;bottom:14%;animation-delay:1.6s"></i>
+      <i class="gleam" style="right:14%;bottom:10%;animation-delay:2.1s"></i>
+      <i class="gleam" style="left:48%;top:26%;animation-delay:1.2s"></i>
+
+      <i class="dshadow"></i>
+      <img class="dice" src="https://i.ibb.co/p63Vvskr/30850bde-3f88-4c25-bea7-c98d00a598e6-removalai-preview.png" alt="Ludo Dice">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="badge" onclick="toast('promo','🎁','Daily Bonus!','₹50 cashback waiting for you')"><i>🎁</i><span>DAILY BONUS</span><b>• ₹50 CASHBACK</b></div>
+    <div class="typing" id="typing"></div>
+    <div class="tabs">
+      <div class="pill" id="pill"></div>
+      <button class="on" id="tR" type="button" onclick="sw('reg')">Register</button>
+      <button id="tL" type="button" onclick="sw('log')">Login</button>
+    </div>
+
+    <form class="form on" id="reg" onsubmit="return reg(event)" novalidate>
+      <div class="row">
+        <div class="f"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span><input id="fn" placeholder="First Name" autocomplete="given-name"></div>
+        <div class="f"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span><input id="ln" placeholder="Last Name" autocomplete="family-name"></div>
+      </div>
+      <div class="f"><span class="ic"><svg viewBox="0 0 24 24"><path d="M6 8h12a4 4 0 0 1 4 4v2a3 3 0 0 1-5 2l-1-1H8l-1 1a3 3 0 0 1-5-2v-2a4 4 0 0 1 4-4z"/><path d="M7 12h3M8.5 10.5v3"/><circle cx="15.5" cy="11.5" r=".6"/><circle cx="17.5" cy="13" r=".6"/></svg></span><input id="un" placeholder="Username" autocomplete="username"></div>
+      <div class="f"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg></span><input id="em" type="email" placeholder="Email Address" autocomplete="email"></div>
+      <div class="f ph"><span class="ic"><span class="flag"><span class="fl"></span>+91</span></span><input id="mb" type="tel" inputmode="numeric" maxlength="10" placeholder="Mobile Number"></div>
+      <div class="f pw"><span class="ic"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="3"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span><input id="pw" type="password" placeholder="Password" autocomplete="new-password">
+        <button type="button" class="eye" onclick="eye(this,'pw')" aria-label="Toggle password"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="slash" d="M3 3l18 18"/></svg></button></div>
+      <div class="promo">
+        <label>🏆 PROMO / REFERRAL CODE — GET ₹100 SIGN-UP BONUS</label>
+        <div class="in"><input id="pc" placeholder="ENTER CODE"><button type="button" class="apply" onclick="promo()">Apply Code</button></div>
+      </div>
+      <button class="cta gold" type="submit" onclick="playClickSound()">Register</button>
+      <p class="note">18+ only • Play responsibly • Instant withdrawals</p>
+    </form>
+
+    <form class="form" id="log" onsubmit="return login(event)" novalidate>
+      <div class="f"><span class="ic"><svg viewBox="0 0 24 24"><path d="M6 8h12a4 4 0 0 1 4 4v2a3 3 0 0 1-5 2l-1-1H8l-1 1a3 3 0 0 1-5-2v-2a4 4 0 0 1 4-4z"/><path d="M7 12h3M8.5 10.5v3"/><circle cx="15.5" cy="11.5" r=".6"/><circle cx="17.5" cy="13" r=".6"/></svg></span><input id="lu" placeholder="Username / Mobile / Email" autocomplete="username"></div>
+      <div class="f pw"><span class="ic"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="3"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span><input id="lp" type="password" placeholder="Password" autocomplete="current-password">
+        <button type="button" class="eye" onclick="eye(this,'lp')" aria-label="Toggle password"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="slash" d="M3 3l18 18"/></svg></button></div>
+      <a href="#" class="forgot" onclick="toast('ok','🔑','Reset link sent','Check your SMS / email');return false">Forgot Password?</a>
+      <button class="cta green" type="submit" onclick="playClickSound()">Login</button>
+      <p class="note">🔒 Secure login • Join 2M+ players winning daily</p>
+    </form>
+  </div>
+</div>
+
+<script>
+// Sound files
+const sndSwitch = new Audio('switch.mp3');
+const sndClick = new Audio('click.mp3');
+
+function playSwitchSound(){
+  try{ sndSwitch.currentTime = 0; sndSwitch.play().catch(()=>{}); }catch(e){}
+}
+function playClickSound(){
+  try{ sndClick.currentTime = 0; sndClick.play().catch(()=>{}); }catch(e){}
+}
+
+const $=id=>document.getElementById(id);
+
+(function initBackground(){
+  const bg=$('bg');
+
+  // Background Twinkling Stars
+  for(let s=0; s<25; s++){
+    const star=document.createElement('div');
+    star.className='star';
+    const sz=2+Math.random()*4;
+    star.style.width=sz+'px';
+    star.style.height=sz+'px';
+    star.style.left=(Math.random()*96)+'%';
+    star.style.top=(Math.random()*90)+'%';
+    star.style.setProperty('--d',(2+Math.random()*3.5)+'s');
+    star.style.animationDelay=(-Math.random()*4)+'s';
+    bg.appendChild(star);
+  }
+
+  // Left & Right Side Visible Rotating Dice
+  const sideClasses=['cw-left','cw-right','cw-left2','cw-right2'];
+  sideClasses.forEach((cls, idx)=>{
+    const w=document.createElement('div');
+    w.className=cls;
+    const c=document.createElement('div');
+    c.className='cube';
+    c.style.animationDuration=(10+idx*2.5)+'s';
+    c.style.scale=(.65+Math.random()*.25);
+    c.innerHTML=[1,2,3,4,5,6].map(n=>'<i>'+n+'</i>').join('');
+    w.appendChild(c);
+    bg.appendChild(w);
+  });
+
+  // Floating Tokens
+  ['#ff2d55','#22e66b','#ffc83d'].forEach(col=>{
+    const t=document.createElement('div');t.className='tok';t.style.setProperty('--c',col);
+    t.style.left=(Math.random()*88)+'%';t.style.top=(Math.random()*85)+'%';
+    t.style.animationDelay=(-Math.random()*6)+'s';bg.appendChild(t);
+  });
+})();
+
+// Typing message animation
+const msgs=['Play Ludo, Win Real Cash! 💰','Join Daily Tournaments 🏆','Instant Withdrawals to UPI ⚡','Sign Up & Get ₹100 Bonus 🎁'];
+let mi=0,ci=0,del=false;
+(function tick(){
+  const m=[...msgs[mi]];$('typing').textContent=m.slice(0,ci).join('');
+  if(!del&&ci<m.length){ci++;setTimeout(tick,70)}
+  else if(!del){del=true;setTimeout(tick,1600)}
+  else if(ci>0){ci--;setTimeout(tick,35)}
+  else{del=false;mi=(mi+1)%msgs.length;setTimeout(tick,300)}
+})();
+
+// Clean Tab Switching (No Double Refresh)
+function sw(w){
+  playSwitchSound();
+  const r=w==='reg';
+  $('pill').classList.toggle('r',!r);
+  $('tR').classList.toggle('on',r);$('tL').classList.toggle('on',!r);
+  $('reg').classList.toggle('on',r);$('log').classList.toggle('on',!r);
+}
+
+function eye(b,id){
+  const i=$(id),s=i.type==='password';
+  i.type=s?'text':'password';b.classList.toggle('show',s);
+}
+
+function toast(type,emoji,title,sub){
+  const t=document.createElement('div');t.className='toast '+type;
+  t.innerHTML='<div class="e">'+emoji+'</div><div>'+title+(sub?'<small>'+sub+'</small>':'')+'</div>';
+  $('toasts').appendChild(t);
+  setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),400)},3200);
+}
+
+function bad(ids,msg){
+  ids.forEach(i=>{const e=$(i);e.classList.remove('bad');void e.offsetWidth;e.classList.add('bad');setTimeout(()=>e.classList.remove('bad'),1500)});
+  toast('err','💥','Oops!',msg);return false;
+}
+
+let promoOk=false;
+function promo(){
+  const v=$('pc').value.trim();
+  if(!v)return bad(['pc'],'Enter a promo code first');
+  if(v.length<4)return bad(['pc'],'Invalid promo code');
+  promoOk=true;toast('promo','🎉','Promo Code Applied!','₹100 bonus unlocked on signup');
+}
+
+function reg(e){
+  e.preventDefault();
+  if(!$('fn').value.trim()||!$('ln').value.trim())return bad(['fn','ln'],'Enter your full name');
+  if($('un').value.trim().length<4)return bad(['un'],'Username needs 4+ characters');
+  if(!/^\S+@\S+\.\S+$/.test($('em').value))return bad(['em'],'Enter a valid email');
+  if(!/^[6-9]\d{9}$/.test($('mb').value))return bad(['mb'],'Enter a valid 10-digit mobile');
+  if($('pw').value.length<6)return bad(['pw'],'Password needs 6+ characters');
+  toast('ok','✅','Welcome, '+$('fn').value.trim()+'!','Account created'+(promoOk?' • ₹100 bonus added':''));
+  return false;
+}
+
+function login(e){
+  e.preventDefault();
+  if(!$('lu').value.trim())return bad(['lu'],'Enter username, mobile or email');
+  if($('lp').value.length<6)return bad(['lp'],'Wrong password, try again');
+  toast('ok','🎲','Login Successful!','Let the games begin');
+  return false;
+}
+
+// Stable Fit calculation without resetting animation or toggling classes
+const root=document.documentElement,typing=()=>document.activeElement&&document.activeElement.tagName==='INPUT';
+let baseCardHeight = 0;
+
+function fit(){
+  if(typing())return;
+  const w=$('wrap'),c=document.querySelector('.card'),reg=$('reg');
+  
+  if(!baseCardHeight || baseCardHeight < 300){
+    baseCardHeight = c.offsetHeight;
+  }
+  const ch = baseCardHeight;
+  c.style.minHeight = ch + 'px';
+  
+  const W=Math.min(innerWidth,w.clientWidth+28);
+  root.style.setProperty('--H',innerHeight+'px');
+  const bs=Math.max(220,Math.min(W,(innerHeight-ch)/.74));
+  root.style.setProperty('--bs',bs+'px');
+  const extra=innerHeight-ch-bs*.74;
+  if(extra>0)c.style.paddingBottom='calc(16px + env(safe-area-inset-bottom,0px) + '+extra+'px)';
+}
+
+addEventListener('focusin',e=>{if(e.target.tagName==='INPUT')root.classList.add('kb')});
+addEventListener('focusout',()=>setTimeout(()=>{
+  if(!typing() && root.classList.contains('kb')){
+    root.classList.remove('kb');
+    scrollTo(0,0);
+    fit();
+  }
+},150));
+
+addEventListener('resize',()=>{ baseCardHeight = 0; fit(); });
+addEventListener('load',fit);
+fit();
+</script>
+</body>
+</html>
