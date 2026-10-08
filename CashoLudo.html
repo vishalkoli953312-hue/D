@@ -5,7 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Casho Ludo – Register / Login</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+/* Remove unwanted browser tap-highlight box, outline & link callout */
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  -webkit-tap-highlight-color:transparent !important;
+  outline:none !important;
+}
+*:focus, *:active, *:focus-visible{
+  outline:none !important;
+  -webkit-tap-highlight-color:transparent !important;
+  box-shadow:none;
+}
+a, button, img, .badge, .tabs{
+  -webkit-touch-callout:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
+input{
+  user-select:auto;
+  -webkit-user-select:auto;
+}
+
 :root{--gold:#ffc83d;--yellow:#fff04d;--green:#22e66b;--red:#ff2d55}
 html,body{min-height:100%}
 body{font-family:'Trebuchet MS',Verdana,sans-serif;color:#fff;overflow-x:hidden;background:#14063f;padding:0 14px;height:var(--H,100dvh);overflow:hidden}
@@ -47,7 +69,7 @@ html{overflow:hidden}html.kb,html.kb body{overflow-y:auto}
 
 .wrap{position:relative;z-index:1;max-width:440px;margin:0 auto;height:var(--H,100dvh);display:flex;flex-direction:column}
 
-/* Badge popup slightly elevated */
+/* Badge popup */
 .badge{position:absolute;top:-6px;left:50%;transform:translate(-50%,-50%);z-index:5;white-space:nowrap;display:flex;align-items:center;gap:8px;padding:7px 16px 7px 8px;border-radius:30px;font-size:11px;font-weight:800;letter-spacing:.6px;color:#ffeaa6;cursor:pointer;background:linear-gradient(180deg,rgba(60,30,120,.95),rgba(20,8,70,.98));border:1.5px solid transparent;background-clip:padding-box;box-shadow:0 0 0 1.5px #ffc83d,0 8px 20px rgba(0,0,0,.5),0 0 18px rgba(255,200,61,.5);overflow:hidden}
 .badge:after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,235,160,.5),transparent);transform:skewX(-20deg);will-change:transform;animation:sweep2 3.4s ease-in-out infinite}
 .badge i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:13px;background:linear-gradient(180deg,#fff7a8,#ffc83d 55%,#e08a00);box-shadow:inset 0 1px 0 #fff}
@@ -64,11 +86,11 @@ html{overflow:hidden}html.kb,html.kb body{overflow-y:auto}
 .shine:after{content:"";position:absolute;top:0;left:-50%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.85),transparent);animation:sheen 3.2s ease-in-out infinite;will-change:transform}
 @keyframes sheen{from{transform:translateX(0)}to{transform:translateX(450%)}}
 
-/* Circular glowing lens gleams (NO STAR SHAPE) */
+/* Circular glowing lens gleams */
 .gleam{position:absolute;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle,#ffffff 15%,rgba(255,230,120,.95) 45%,rgba(255,200,61,0) 70%);box-shadow:0 0 14px 4px rgba(255,225,120,.9),0 0 28px 8px rgba(255,180,50,.5);animation:gleamPulse 2.6s ease-in-out infinite;opacity:0;pointer-events:none;z-index:3}
 @keyframes gleamPulse{0%,100%{opacity:0;transform:scale(.3)}50%{opacity:1;transform:scale(1.35)}}
 
-/* Dice position slightly lowered */
+/* Dice position */
 .dice{position:absolute;width:28%;aspect-ratio:1;object-fit:contain;left:36%;top:13%;z-index:4;animation:bob 2.4s ease-in-out infinite;filter:drop-shadow(0 8px 5px rgba(0,0,0,.5));will-change:transform}
 .dshadow{position:absolute;left:39%;top:43%;width:22%;height:4%;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.7),transparent 70%);z-index:3;animation:dsh 2.4s ease-in-out infinite;will-change:transform,opacity}
 @keyframes dsh{0%,100%{transform:scale(.75);opacity:.4}50%{transform:scale(1.05);opacity:.85}}
@@ -78,7 +100,7 @@ html{overflow:hidden}html.kb,html.kb body{overflow-y:auto}
 .typing:after{content:"|";animation:blink .7s steps(1) infinite;color:var(--yellow)}
 @keyframes blink{50%{opacity:0}}
 
-/* Bottom Card / Popup raised slightly */
+/* Bottom Card */
 .card{position:relative;z-index:2;margin:-10px -14px 0;border-radius:30px 30px 0 0;background:linear-gradient(160deg,#3d31c4,#1a0a66);border:2px solid rgba(255,214,90,.6);border-bottom:0;box-shadow:0 -8px 30px rgba(255,200,61,.35),inset 0 2px 0 rgba(255,255,255,.35);padding:30px 18px calc(16px + env(safe-area-inset-bottom,0px))}
 
 .tabs{position:relative;display:grid;grid-template-columns:1fr 1fr;background:rgba(10,5,50,.55);border-radius:40px;padding:5px;margin-bottom:12px;box-shadow:inset 0 4px 10px rgba(0,0,0,.5)}
@@ -87,40 +109,144 @@ html{overflow:hidden}html.kb,html.kb body{overflow-y:auto}
 .pill{position:absolute;z-index:1;top:5px;bottom:5px;left:5px;width:calc(50% - 5px);border-radius:35px;background:linear-gradient(180deg,#fff7a8,var(--gold) 55%,#e58a00);box-shadow:0 4px 0 #a35a00,0 0 18px rgba(255,200,61,.8),inset 0 2px 0 #fff;transition:transform .3s cubic-bezier(.4,1.4,.4,1)}
 .pill.r{transform:translateX(100%)}
 
-/* Smooth Form Transition without Double Reload */
 .form{display:none;opacity:0}
 .form.on{display:block;animation:fadeQuick .22s ease-out forwards}
 @keyframes fadeQuick{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
 
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.f{position:relative;margin-bottom:10px}
-.f input{width:100%;padding:13px 12px 13px 46px;font-size:16px;border-radius:15px;border:2px solid rgba(255,255,255,.25);background:rgba(8,4,60,.55);color:#fff;font-family:'Trebuchet MS';outline:0;transition:border-color .25s,box-shadow .25s;box-shadow:inset 0 3px 8px rgba(0,0,0,.4)}
-.f input::placeholder{color:#9aa0e6}
-.f input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(34,230,107,.25),0 0 18px rgba(34,230,107,.5)}
+
+/* Input Container with Stacking Context */
+.f{position:relative;margin-bottom:11px;z-index:1}
+
+/* Input Styling */
+.f input{
+  width:100%;
+  padding:14px 14px 14px 48px;
+  font-size:15px;
+  border-radius:18px;
+  border:1.5px solid rgba(255,255,255,.22);
+  background:rgba(11,5,56,.58);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  color:#fff;
+  font-family:'Trebuchet MS',sans-serif;
+  transition:border-color .25s ease, box-shadow .25s ease, background-color .25s ease, transform .2s ease;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.4), 0 2px 5px rgba(0,0,0,.15);
+}
+.f input::placeholder{color:#9aa0e6;opacity:.85}
+.f input:hover{
+  border-color:rgba(255,255,255,.35);
+  background:rgba(15,8,70,.68);
+}
+.f input:focus{
+  border-color:var(--green);
+  background:rgba(12,6,60,.82);
+  box-shadow:0 0 0 3px rgba(34,230,107,.25), 0 0 22px rgba(34,230,107,.48), inset 0 2px 5px rgba(0,0,0,.3);
+  transform:translateY(-1px);
+}
 .f input.bad{border-color:var(--red);animation:shake .4s}
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-.ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:24px;height:24px;display:grid;place-items:center;color:var(--gold);filter:drop-shadow(0 0 5px var(--gold))}
-.ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.f.ph input{padding-left:88px}
-.ph .ic{width:auto;left:8px;filter:none}
-.flag{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.16);padding:4px 7px;border-radius:9px;font-size:12px;font-weight:800;color:#fff}
-.fl{width:16px;height:11px;border-radius:2px;background:linear-gradient(#ff9933 33%,#fff 33% 66%,#138808 66%);position:relative;box-shadow:0 0 0 1px #0004}
-.fl:after{content:"";position:absolute;left:6px;top:3.5px;width:4px;height:4px;border-radius:50%;border:1px solid #000080}
-.eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:34px;height:34px;border:0;border-radius:10px;cursor:pointer;color:#fff;background:linear-gradient(180deg,#6f7bff,#3a3fd1);box-shadow:0 3px 0 #1a1c80;display:grid;place-items:center;transition:.15s}
+
+/* High Clarity, Vibrant, Glowing Icons */
+.ic{
+  position:absolute;
+  left:13px;
+  top:50%;
+  transform:translateY(-50%);
+  width:24px;
+  height:24px;
+  display:grid;
+  place-items:center;
+  color:#ffcc33;
+  z-index:5;
+  pointer-events:none;
+  filter:drop-shadow(0 0 6px rgba(255,204,51,0.9)) drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+  transition:all .25s ease;
+}
+.ic svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+.f:focus-within .ic{
+  color:var(--green);
+  filter:drop-shadow(0 0 8px rgba(34,230,107,0.95)) drop-shadow(0 2px 5px rgba(0,0,0,0.8));
+}
+
+/* Fix Paste & Chrome/Android Autofill White/Yellow Patch */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active{
+  -webkit-box-shadow:0 0 0 1000px #160a52 inset !important;
+  -webkit-text-fill-color:#ffffff !important;
+  caret-color:#ffffff !important;
+  border-radius:18px !important;
+  font-family:'Trebuchet MS',sans-serif !important;
+  transition:background-color 5000s ease-in-out 0s;
+}
+::selection{
+  background:rgba(34,230,107,.45);
+  color:#fff;
+}
+
+/* Indian +91 Mobile Field */
+.f.ph input{
+  padding-left:80px;
+  letter-spacing:.5px;
+  font-weight:700;
+}
+.ph .ic{
+  width:auto;
+  left:8px;
+  filter:none;
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  z-index:5;
+}
+.flag{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  background:linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0.08));
+  padding:5px 7px;
+  border-radius:10px;
+  font-size:13px;
+  font-weight:900;
+  color:#fff;
+  border:1px solid rgba(255,255,255,0.25);
+  box-shadow:0 2px 6px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.4);
+  text-shadow:0 1px 2px rgba(0,0,0,0.6);
+}
+.fl{
+  width:16px;
+  height:11px;
+  border-radius:2px;
+  background:linear-gradient(#ff9933 33%,#fff 33% 66%,#138808 66%);
+  position:relative;
+  box-shadow:0 0 0 1px rgba(0,0,0,0.3);
+}
+.fl:after{content:"";position:absolute;left:6px;top:3.5px;width:3.5px;height:3.5px;border-radius:50%;border:1px solid #000080}
+.ph .divline{
+  width:1.5px;
+  height:18px;
+  background:rgba(255,255,255,0.25);
+  margin-left:2px;
+}
+
+.eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:34px;height:34px;border:0;border-radius:12px;cursor:pointer;color:#fff;background:linear-gradient(180deg,#6f7bff,#3a3fd1);box-shadow:0 3px 0 #1a1c80;display:grid;place-items:center;transition:.15s;z-index:6}
 .eye:active{transform:translateY(-48%);box-shadow:0 1px 0 #1a1c80}
-.eye svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.eye svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
 .eye .slash{display:none}.eye.show .slash{display:block}
-.f.pw input{padding-right:56px}
+.f.pw input{padding-right:52px}
 
 .promo{position:relative;margin:2px 0 12px;padding:10px;border-radius:18px;background:linear-gradient(135deg,rgba(255,200,61,.28),rgba(255,45,85,.22));border:2px dashed var(--gold);box-shadow:0 0 18px rgba(255,200,61,.45)}
 .promo label{display:block;font-size:11px;font-weight:900;color:var(--yellow);margin-bottom:6px;letter-spacing:.4px}
 .promo .in{display:flex;gap:8px}
-.promo input{flex:1;min-width:0;padding:10px;font-size:15px;border-radius:12px;border:2px solid rgba(255,255,255,.3);background:rgba(8,4,60,.65);color:var(--yellow);font-weight:800;font-family:'Trebuchet MS';text-transform:uppercase;letter-spacing:2px;outline:0}
+.promo input{flex:1;min-width:0;padding:10px;font-size:15px;border-radius:14px;border:2px solid rgba(255,255,255,.3);background:rgba(8,4,60,.65);color:var(--yellow);font-weight:800;font-family:'Trebuchet MS';text-transform:uppercase;letter-spacing:2px;box-shadow:none}
 .promo input.bad{border-color:var(--red);animation:shake .4s}
 .apply{border:0;border-radius:12px;padding:0 14px;font:900 13px 'Trebuchet MS';color:#fff;cursor:pointer;background:linear-gradient(180deg,#ff6b8a,var(--red) 55%,#b0002a);box-shadow:0 4px 0 #6d0019,0 0 16px var(--red)}
 .apply:active{transform:translateY(3px);box-shadow:0 1px 0 #6d0019}
 
-.cta{width:100%;border:0;border-radius:14px;padding:12px 14px;font:900 17px 'Trebuchet MS';letter-spacing:1px;cursor:pointer;position:relative;overflow:hidden;transition:transform .12s}
+.cta{width:100%;border:0;border-radius:16px;padding:12px 14px;font:900 17px 'Trebuchet MS';letter-spacing:1px;cursor:pointer;position:relative;overflow:hidden;transition:transform .12s}
 .cta:after{content:"";position:absolute;top:0;left:-70%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);transform:skewX(-20deg);will-change:transform;animation:sweep2 2.4s infinite}
 @keyframes sweep2{to{transform:translateX(450%) skewX(-20deg)}}
 .gold{color:#5a2c00;background:linear-gradient(180deg,#fff7a8,var(--gold) 50%,#e58a00);box-shadow:0 6px 0 #9a5200,0 12px 20px rgba(0,0,0,.45),0 0 24px rgba(255,200,61,.8),inset 0 2px 0 #fff;text-shadow:0 1px 0 #fff9;animation:pulse 1.8s infinite}
@@ -146,6 +272,9 @@ html{overflow:hidden}html.kb,html.kb body{overflow-y:auto}
 <div class="bg" id="bg"></div>
 <div id="toasts"></div>
 
+<!-- Hidden Iframe to trigger Browser/Google Password Save Modal without page refresh -->
+<iframe name="auth_save_target" id="auth_save_target" style="display:none;width:0;height:0;border:0;"></iframe>
+
 <div class="wrap" id="wrap">
   <div class="hero">
     <div class="aura"></div>
@@ -153,7 +282,6 @@ html{overflow:hidden}html.kb,html.kb body{overflow-y:auto}
       <img class="board" src="https://i.ibb.co/6J0xSd4t/file-00000000435881faa031a06b327e2d1c.png" alt="Ludo Board">
       <div class="shine"></div>
       
-      <!-- Circular Glowing Lens Shines (No star shape) -->
       <i class="gleam" style="left:10%;top:12%"></i>
       <i class="gleam" style="right:10%;top:16%;animation-delay:.9s"></i>
       <i class="gleam" style="left:16%;bottom:14%;animation-delay:1.6s"></i>
@@ -174,16 +302,29 @@ html{overflow:hidden}html.kb,html.kb body{overflow-y:auto}
       <button id="tL" type="button" onclick="sw('log')">Login</button>
     </div>
 
-    <form class="form on" id="reg" onsubmit="return reg(event)" novalidate>
+    <!-- Registration Form -->
+    <form class="form on" id="reg" method="POST" action="about:blank" target="auth_save_target" onsubmit="return reg(event)" autocomplete="on" novalidate>
       <div class="row">
-        <div class="f"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span><input id="fn" placeholder="First Name" autocomplete="given-name"></div>
-        <div class="f"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span><input id="ln" placeholder="Last Name" autocomplete="family-name"></div>
+        <div class="f"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span><input id="fn" name="given-name" placeholder="First Name" autocomplete="given-name"></div>
+        <div class="f"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span><input id="ln" name="family-name" placeholder="Last Name" autocomplete="family-name"></div>
       </div>
-      <div class="f"><span class="ic"><svg viewBox="0 0 24 24"><path d="M6 8h12a4 4 0 0 1 4 4v2a3 3 0 0 1-5 2l-1-1H8l-1 1a3 3 0 0 1-5-2v-2a4 4 0 0 1 4-4z"/><path d="M7 12h3M8.5 10.5v3"/><circle cx="15.5" cy="11.5" r=".6"/><circle cx="17.5" cy="13" r=".6"/></svg></span><input id="un" placeholder="Username" autocomplete="username"></div>
-      <div class="f"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg></span><input id="em" type="email" placeholder="Email Address" autocomplete="email"></div>
-      <div class="f ph"><span class="ic"><span class="flag"><span class="fl"></span>+91</span></span><input id="mb" type="tel" inputmode="numeric" maxlength="10" placeholder="Mobile Number"></div>
-      <div class="f pw"><span class="ic"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="3"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span><input id="pw" type="password" placeholder="Password" autocomplete="new-password">
-        <button type="button" class="eye" onclick="eye(this,'pw')" aria-label="Toggle password"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="slash" d="M3 3l18 18"/></svg></button></div>
+      <div class="f"><span class="ic"><svg viewBox="0 0 24 24"><path d="M6 8h12a4 4 0 0 1 4 4v2a3 3 0 0 1-5 2l-1-1H8l-1 1a3 3 0 0 1-5-2v-2a4 4 0 0 1 4-4z"/><path d="M7 12h3M8.5 10.5v3"/><circle cx="15.5" cy="11.5" r=".6"/><circle cx="17.5" cy="13" r=".6"/></svg></span><input id="un" name="username" placeholder="Username" autocomplete="username"></div>
+      <div class="f"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg></span><input id="em" name="email" type="email" placeholder="Email Address" autocomplete="email"></div>
+      
+      <div class="f ph">
+        <span class="ic">
+          <span class="flag"><span class="fl"></span>+91</span>
+          <span class="divline"></span>
+        </span>
+        <input id="mb" name="tel" type="tel" inputmode="numeric" maxlength="10" placeholder="Mobile Number" autocomplete="tel-national">
+      </div>
+      
+      <div class="f pw">
+        <span class="ic"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="3"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>
+        <input id="pw" name="password" type="password" placeholder="Password" autocomplete="new-password">
+        <button type="button" class="eye" onclick="eye(this,'pw')" aria-label="Toggle password"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="slash" d="M3 3l18 18"/></svg></button>
+      </div>
+
       <div class="promo">
         <label>🏆 PROMO / REFERRAL CODE — GET ₹100 SIGN-UP BONUS</label>
         <div class="in"><input id="pc" placeholder="ENTER CODE"><button type="button" class="apply" onclick="promo()">Apply Code</button></div>
@@ -192,11 +333,18 @@ html{overflow:hidden}html.kb,html.kb body{overflow-y:auto}
       <p class="note">18+ only • Play responsibly • Instant withdrawals</p>
     </form>
 
-    <form class="form" id="log" onsubmit="return login(event)" novalidate>
-      <div class="f"><span class="ic"><svg viewBox="0 0 24 24"><path d="M6 8h12a4 4 0 0 1 4 4v2a3 3 0 0 1-5 2l-1-1H8l-1 1a3 3 0 0 1-5-2v-2a4 4 0 0 1 4-4z"/><path d="M7 12h3M8.5 10.5v3"/><circle cx="15.5" cy="11.5" r=".6"/><circle cx="17.5" cy="13" r=".6"/></svg></span><input id="lu" placeholder="Username / Mobile / Email" autocomplete="username"></div>
-      <div class="f pw"><span class="ic"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="3"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span><input id="lp" type="password" placeholder="Password" autocomplete="current-password">
-        <button type="button" class="eye" onclick="eye(this,'lp')" aria-label="Toggle password"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="slash" d="M3 3l18 18"/></svg></button></div>
-      <a href="#" class="forgot" onclick="toast('ok','🔑','Reset link sent','Check your SMS / email');return false">Forgot Password?</a>
+    <!-- Login Form -->
+    <form class="form" id="log" method="POST" action="about:blank" target="auth_save_target" onsubmit="return login(event)" autocomplete="on" novalidate>
+      <div class="f">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M6 8h12a4 4 0 0 1 4 4v2a3 3 0 0 1-5 2l-1-1H8l-1 1a3 3 0 0 1-5-2v-2a4 4 0 0 1 4-4z"/><path d="M7 12h3M8.5 10.5v3"/><circle cx="15.5" cy="11.5" r=".6"/><circle cx="17.5" cy="13" r=".6"/></svg></span>
+        <input id="lu" name="username" placeholder="Username / Mobile / Email" autocomplete="username">
+      </div>
+      <div class="f pw">
+        <span class="ic"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="3"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>
+        <input id="lp" name="password" type="password" placeholder="Password" autocomplete="current-password">
+        <button type="button" class="eye" onclick="eye(this,'lp')" aria-label="Toggle password"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="slash" d="M3 3l18 18"/></svg></button>
+      </div>
+      <a href="javascript:void(0)" class="forgot" onclick="toast('ok','🔑','Reset link sent','Check your SMS / email');return false">Forgot Password?</a>
       <button class="cta green" type="submit" onclick="playClickSound()">Login</button>
       <p class="note">🔒 Secure login • Join 2M+ players winning daily</p>
     </form>
@@ -204,7 +352,6 @@ html{overflow:hidden}html.kb,html.kb body{overflow-y:auto}
 </div>
 
 <script>
-// Sound files
 const sndSwitch = new Audio('switch.mp3');
 const sndClick = new Audio('click.mp3');
 
@@ -220,7 +367,6 @@ const $=id=>document.getElementById(id);
 (function initBackground(){
   const bg=$('bg');
 
-  // Background Twinkling Stars
   for(let s=0; s<25; s++){
     const star=document.createElement('div');
     star.className='star';
@@ -234,7 +380,6 @@ const $=id=>document.getElementById(id);
     bg.appendChild(star);
   }
 
-  // Left & Right Side Visible Rotating Dice
   const sideClasses=['cw-left','cw-right','cw-left2','cw-right2'];
   sideClasses.forEach((cls, idx)=>{
     const w=document.createElement('div');
@@ -248,7 +393,6 @@ const $=id=>document.getElementById(id);
     bg.appendChild(w);
   });
 
-  // Floating Tokens
   ['#ff2d55','#22e66b','#ffc83d'].forEach(col=>{
     const t=document.createElement('div');t.className='tok';t.style.setProperty('--c',col);
     t.style.left=(Math.random()*88)+'%';t.style.top=(Math.random()*85)+'%';
@@ -256,7 +400,6 @@ const $=id=>document.getElementById(id);
   });
 })();
 
-// Typing message animation
 const msgs=['Play Ludo, Win Real Cash! 💰','Join Daily Tournaments 🏆','Instant Withdrawals to UPI ⚡','Sign Up & Get ₹100 Bonus 🎁'];
 let mi=0,ci=0,del=false;
 (function tick(){
@@ -267,13 +410,13 @@ let mi=0,ci=0,del=false;
   else{del=false;mi=(mi+1)%msgs.length;setTimeout(tick,300)}
 })();
 
-// Clean Tab Switching (No Double Refresh)
 function sw(w){
   playSwitchSound();
   const r=w==='reg';
   $('pill').classList.toggle('r',!r);
   $('tR').classList.toggle('on',r);$('tL').classList.toggle('on',!r);
   $('reg').classList.toggle('on',r);$('log').classList.toggle('on',!r);
+  if(!r) restoreSavedCredentials();
 }
 
 function eye(b,id){
@@ -301,32 +444,77 @@ function promo(){
   promoOk=true;toast('promo','🎉','Promo Code Applied!','₹100 bonus unlocked on signup');
 }
 
+function triggerGoogleSave(user, pass, name){
+  try{
+    localStorage.setItem('casho_last_user', user);
+    localStorage.setItem('casho_last_pass', pass);
+  }catch(e){}
+
+  if(window.PasswordCredential && navigator.credentials && navigator.credentials.store){
+    try{
+      const cred = new PasswordCredential({
+        id: user,
+        password: pass,
+        name: name || user
+      });
+      navigator.credentials.store(cred).catch(()=>{});
+    }catch(err){}
+  }
+}
+
+function restoreSavedCredentials(){
+  try{
+    const u = localStorage.getItem('casho_last_user');
+    const p = localStorage.getItem('casho_last_pass');
+    if(u && !$('lu').value) $('lu').value = u;
+    if(p && !$('lp').value) $('lp').value = p;
+  }catch(e){}
+}
+
 function reg(e){
-  e.preventDefault();
-  if(!$('fn').value.trim()||!$('ln').value.trim())return bad(['fn','ln'],'Enter your full name');
-  if($('un').value.trim().length<4)return bad(['un'],'Username needs 4+ characters');
-  if(!/^\S+@\S+\.\S+$/.test($('em').value))return bad(['em'],'Enter a valid email');
-  if(!/^[6-9]\d{9}$/.test($('mb').value))return bad(['mb'],'Enter a valid 10-digit mobile');
-  if($('pw').value.length<6)return bad(['pw'],'Password needs 6+ characters');
-  toast('ok','✅','Welcome, '+$('fn').value.trim()+'!','Account created'+(promoOk?' • ₹100 bonus added':''));
-  return false;
+  const fn = $('fn').value.trim();
+  const ln = $('ln').value.trim();
+  const un = $('un').value.trim();
+  const em = $('em').value.trim();
+  const mb = $('mb').value.trim();
+  const pw = $('pw').value;
+
+  if(!fn || !ln){ e.preventDefault(); return bad(['fn','ln'],'Enter your full name'); }
+  if(un.length < 4){ e.preventDefault(); return bad(['un'],'Username needs 4+ characters'); }
+  if(!/^\S+@\S+\.\S+$/.test(em)){ e.preventDefault(); return bad(['em'],'Enter a valid email'); }
+  if(!/^[6-9]\d{9}$/.test(mb)){ e.preventDefault(); return bad(['mb'],'Enter a valid 10-digit mobile'); }
+  if(pw.length < 6){ e.preventDefault(); return bad(['pw'],'Password needs 6+ characters'); }
+
+  triggerGoogleSave(un, pw, fn + ' ' + ln);
+
+  $('lu').value = un;
+  $('lp').value = pw;
+
+  toast('ok','✅','Welcome, '+fn+'!','Account created'+(promoOk?' • ₹100 bonus added':''));
+  return true;
 }
 
 function login(e){
-  e.preventDefault();
-  if(!$('lu').value.trim())return bad(['lu'],'Enter username, mobile or email');
-  if($('lp').value.length<6)return bad(['lp'],'Wrong password, try again');
+  const u = $('lu').value.trim();
+  const p = $('lp').value;
+
+  if(!u){ e.preventDefault(); return bad(['lu'],'Enter username, mobile or email'); }
+  if(p.length < 6){ e.preventDefault(); return bad(['lp'],'Wrong password, try again'); }
+
+  triggerGoogleSave(u, p, u);
+
   toast('ok','🎲','Login Successful!','Let the games begin');
-  return false;
+  return true;
 }
 
-// Stable Fit calculation without resetting animation or toggling classes
+document.addEventListener('DOMContentLoaded', restoreSavedCredentials);
+
 const root=document.documentElement,typing=()=>document.activeElement&&document.activeElement.tagName==='INPUT';
 let baseCardHeight = 0;
 
 function fit(){
   if(typing())return;
-  const w=$('wrap'),c=document.querySelector('.card'),reg=$('reg');
+  const w=$('wrap'),c=document.querySelector('.card');
   
   if(!baseCardHeight || baseCardHeight < 300){
     baseCardHeight = c.offsetHeight;
