@@ -3,165 +3,269 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Premium Cloudinary Vault</title>
     
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS (Stable CDN) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { darkBg: '#0f172a', cardBg: '#1e293b' }
-                }
-            }
-        }
-    </script>
-
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
-        
-        /* TV Focus Styles (For D-Pad Navigation on Android TV) */
-        button:focus, input:focus, a:focus {
-            outline: none;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.8);
-            transform: scale(1.02);
-            transition: all 0.2s ease;
+        /* =========================================
+           PURE CSS DESIGN (No External CDN Needed)
+           ========================================= */
+        :root {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #0f172a;
+            --bg-hover: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --danger: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.1);
+            --success: #10b981;
+            --radius: 12px;
         }
 
-        /* Custom Scrollbar */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* --- Scrollbar --- */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #1e293b; }
-        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        ::-webkit-scrollbar-track { background: var(--bg-card); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
 
-        .glass-card {
-            background: #1e293b;
-            border: 1px solid #334155;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        /* --- Layout --- */
+        .container { max-w-width: 1200px; margin: 0 auto; width: 100%; }
+        .grid-layout {
+            display: flex; flex-direction: column; gap: 20px;
+        }
+        @media (min-width: 992px) {
+            .grid-layout { flex-direction: row; align-items: flex-start; }
+            .col-left { width: 35%; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; }
+            .col-right { width: 65%; flex-grow: 1; }
         }
 
-        .loader {
-            border: 4px solid #334155; border-top-color: #3b82f6;
-            border-radius: 50%; width: 24px; height: 24px;
-            animation: spin 1s linear infinite;
+        /* --- Cards & Headers --- */
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .header-main {
+            display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px;
+            margin-bottom: 25px;
+            padding: 20px; background-color: rgba(30, 41, 59, 0.5); border: 1px solid var(--border-color); border-radius: var(--radius);
+        }
+        .header-title { display: flex; align-items: center; gap: 15px; }
+        .header-title h1 { font-size: 1.5rem; margin-bottom: 2px; }
+        .header-title p { font-size: 0.85rem; color: var(--text-muted); }
+        .card-title { font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+
+        /* --- Inputs & Buttons --- */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px; }
+        input[type="text"] {
+            width: 100%; padding: 12px 15px; background-color: var(--bg-input); border: 1px solid var(--border-color);
+            color: var(--text-main); border-radius: 8px; font-size: 1rem; transition: 0.2s;
+        }
+        input[type="text"]:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3); }
+        
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 10px 16px; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 500;
+            cursor: pointer; transition: 0.2s; background-color: var(--bg-hover); color: var(--text-main);
+        }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover, .btn-primary:focus { background-color: var(--primary-hover); }
+        .btn-sync { background-color: var(--border-color); }
+        .btn-sync:hover, .btn-sync:focus { background-color: var(--text-muted); color: #000; }
+        
+        /* --- TV Focus States --- */
+        button:focus, input:focus, a:focus, .upload-zone:focus {
+            outline: none; box-shadow: 0 0 0 4px var(--primary); transform: scale(1.02); z-index: 10;
+        }
+
+        /* --- Upload Zone --- */
+        .upload-zone {
+            border: 2px dashed var(--border-color); border-radius: var(--radius); padding: 30px 15px;
+            text-align: center; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 10px;
+            background-color: rgba(15, 23, 42, 0.5); transition: 0.2s; width: 100%;
+        }
+        .upload-zone:hover, .upload-zone:focus { border-color: var(--primary); background-color: rgba(59, 130, 246, 0.05); }
+        .upload-zone span { font-size: 1.1rem; font-weight: 600; }
+        .upload-zone small { color: var(--text-muted); font-size: 0.85rem; }
+
+        /* --- Gallery Grid --- */
+        .gallery-grid {
+            display: flex; flex-wrap: wrap; gap: 15px;
+        }
+        .gallery-item {
+            width: 100%; background-color: var(--bg-body); border: 1px solid var(--border-color);
+            border-radius: var(--radius); padding: 10px; display: flex; flex-direction: column; gap: 10px;
+        }
+        @media (min-width: 600px) { .gallery-item { width: calc(50% - 7.5px); } }
+        
+        .img-container {
+            width: 100%; height: 160px; background-color: #000; border-radius: 8px; overflow: hidden; position: relative; border: 1px solid var(--border-color);
+        }
+        .img-container img { width: 100%; height: 100%; object-fit: contain; }
+        .item-actions { display: flex; gap: 10px; }
+        .item-actions .btn { flex-grow: 1; padding: 10px; }
+        .btn-delete { background-color: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); padding: 10px !important; flex-grow: 0 !important; }
+        .btn-delete:hover, .btn-delete:focus { background-color: var(--danger); color: white; }
+
+        /* --- Utils --- */
+        .hidden { display: none !important; }
+        .icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .icon-lg { width: 32px; height: 32px; }
+        .badge { background: var(--bg-body); color: var(--text-muted); padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; border: 1px solid var(--border-color); }
+
+        /* --- Loading State --- */
+        .loader-container { padding: 20px; text-align: center; border: 1px solid var(--border-color); border-radius: var(--radius); background-color: var(--bg-body); }
+        .spinner {
+            border: 4px solid var(--border-color); border-top: 4px solid var(--primary);
+            border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 10px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- Empty State --- */
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+        .empty-state svg { width: 64px; height: 64px; margin-bottom: 15px; opacity: 0.5; }
+
+        /* --- Toast --- */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast {
+            padding: 12px 20px; border-radius: 8px; color: white; display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5); font-weight: 500; font-size: 0.9rem;
+            transform: translateX(120%); transition: transform 0.3s ease;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.success { background-color: var(--success); }
+        .toast.error { background-color: var(--danger); }
+        .toast.info { background-color: var(--bg-hover); border: 1px solid var(--border-color); }
+
+        /* Screen reader only for fallback textarea */
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-8">
+<body>
 
-    <!-- Toast Notifications -->
-    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3"></div>
+    <div id="toast-container"></div>
 
-    <div class="max-w-6xl mx-auto">
+    <div class="container">
         
         <!-- Header -->
-        <header class="flex flex-col md:flex-row items-center justify-between mb-8 gap-4 bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
-            <div class="flex items-center gap-4">
-                <div class="bg-blue-600 p-3 rounded-xl shadow-lg shadow-blue-500/30">
-                    <i data-lucide="cloud-lightning" class="w-8 h-8 text-white"></i>
+        <div class="header-main">
+            <div class="header-title">
+                <div style="background: var(--primary); padding: 10px; border-radius: 12px;">
+                    <!-- Lightning Icon -->
+                    <svg class="icon icon-lg" style="color: white;" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
                 </div>
                 <div>
-                    <h1 class="text-2xl md:text-3xl font-bold text-white">Cloudinary Pro</h1>
-                    <p class="text-sm text-gray-400">TV & Mobile Optimized Storage</p>
+                    <h1>Cloudinary Vault</h1>
+                    <p>TV & Mobile Optimized Storage (Offline UI)</p>
                 </div>
             </div>
-            <button onclick="syncFromCloudinary()" class="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-white font-medium transition-colors">
-                <i data-lucide="refresh-cw" class="w-4 h-4"></i> Sync Cloud Data
+            <button onclick="syncFromCloudinary()" class="btn btn-sync" tabindex="0">
+                <!-- Sync Icon -->
+                <svg class="icon" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                Sync Cloud Data
             </button>
-        </header>
+        </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="grid-layout">
             
-            <!-- Left: Settings & Upload -->
-            <div class="lg:col-span-4 space-y-6">
+            <!-- Left Column: Config & Upload -->
+            <div class="col-left">
                 
                 <!-- Setup Card -->
-                <div class="glass-card rounded-2xl p-6">
-                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
-                        <i data-lucide="settings" class="w-5 h-5 text-blue-400"></i> API Config
-                    </h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-1.5 text-gray-300">Cloud Name</label>
-                            <input type="text" id="cloudName" placeholder="e.g., dyxhxyz" 
-                                class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:border-blue-500 transition-colors">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1.5 text-gray-300">Upload Preset</label>
-                            <input type="text" id="uploadPreset" placeholder="e.g., my_preset" 
-                                class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:border-blue-500 transition-colors">
-                        </div>
+                <div class="card">
+                    <div class="card-title">
+                        <!-- Settings Icon -->
+                        <svg class="icon" style="color: var(--primary);" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        API Config
+                    </div>
+                    <div class="form-group">
+                        <label>Cloud Name</label>
+                        <input type="text" id="cloudName" placeholder="e.g., dyxhxyz" tabindex="0">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Upload Preset</label>
+                        <input type="text" id="uploadPreset" placeholder="e.g., my_preset" tabindex="0">
                     </div>
                 </div>
 
                 <!-- Upload Card -->
-                <div class="glass-card rounded-2xl p-6">
-                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
-                        <i data-lucide="upload" class="w-5 h-5 text-green-400"></i> Upload Image
-                    </h2>
+                <div class="card">
+                    <div class="card-title">
+                        <!-- Upload Icon -->
+                        <svg class="icon" style="color: var(--success);" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        Upload Image
+                    </div>
                     
                     <input type="file" id="fileInput" class="hidden" accept="image/*">
-                    <button id="uploadBtn" onclick="document.getElementById('fileInput').click()" 
-                        class="w-full border-2 border-dashed border-slate-500 hover:border-blue-500 bg-slate-800 hover:bg-slate-700 rounded-xl p-8 text-center transition-all group flex flex-col items-center">
-                        <i data-lucide="image-plus" class="w-10 h-10 text-slate-400 group-hover:text-blue-400 mb-3"></i>
-                        <span class="text-white font-medium text-lg">Select Image</span>
-                        <span class="text-sm text-slate-400 mt-1">or Click to Browse (TV Friendly)</span>
+                    <button id="uploadBtn" class="upload-zone" onclick="document.getElementById('fileInput').click()" tabindex="0">
+                        <!-- Image Icon -->
+                        <svg class="icon icon-lg" style="color: var(--text-muted);" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                        <span>Select Image</span>
+                        <small>or Click to Browse (TV Friendly)</small>
                     </button>
 
-                    <!-- Uploading Loader -->
-                    <div id="uploadLoader" class="hidden mt-4 p-4 bg-slate-800 rounded-xl border border-slate-600 flex items-center justify-center gap-3">
-                        <div class="loader"></div>
-                        <span class="text-white font-medium">Uploading to Cloud...</span>
+                    <div id="uploadLoader" class="loader-container hidden">
+                        <div class="spinner"></div>
+                        <div>Uploading to Cloud...</div>
                     </div>
                 </div>
 
             </div>
 
-            <!-- Right: Gallery -->
-            <div class="lg:col-span-8">
-                <div class="glass-card rounded-2xl p-6 min-h-[500px]">
-                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-700">
-                        <h2 class="text-xl font-semibold flex items-center gap-2 text-white">
-                            <i data-lucide="grid" class="w-6 h-6 text-purple-400"></i> Cloud Gallery
-                        </h2>
-                        <span class="text-xs text-slate-400 bg-slate-800 px-3 py-1 rounded-full">Tag: tv_uploads</span>
+            <!-- Right Column: Gallery -->
+            <div class="col-right card" style="min-height: 500px;">
+                <div class="card-title" style="justify-content: space-between; padding-bottom: 15px; margin-bottom: 20px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <!-- Grid Icon -->
+                        <svg class="icon" style="color: #a855f7;" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        Cloud Gallery
                     </div>
+                    <span class="badge">Tag: tv_uploads</span>
+                </div>
 
-                    <!-- Gallery Grid -->
-                    <div id="galleryGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <!-- Items inject dynamically -->
-                    </div>
+                <!-- Empty State -->
+                <div id="emptyState" class="empty-state hidden">
+                    <!-- Folder Icon -->
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    <h3 style="margin-bottom: 5px;">No images found</h3>
+                    <p style="font-size: 0.9rem;">Upload an image or Sync Cloud Data</p>
+                </div>
 
-                    <!-- Empty State -->
-                    <div id="emptyState" class="hidden flex-col items-center justify-center py-20">
-                        <i data-lucide="folder-open" class="w-16 h-16 text-slate-600 mb-4"></i>
-                        <p class="text-lg text-slate-300 font-medium">No images found</p>
-                        <p class="text-sm text-slate-500 mt-1">Upload an image or Sync Cloud Data</p>
-                    </div>
+                <!-- Gallery Grid -->
+                <div id="galleryGrid" class="gallery-grid">
+                    <!-- Dynamically injected items -->
                 </div>
             </div>
 
         </div>
     </div>
 
-    <!-- Hidden Textarea for Copy Fallback -->
-    <textarea id="copyFallback" class="hidden"></textarea>
+    <!-- Fallback Input for Copying on old TVs -->
+    <textarea id="copyFallback" class="sr-only"></textarea>
 
     <script>
         // --- Core Variables ---
-        const TAG_NAME = 'tv_uploads'; // Cloudinary resource list tag
+        const TAG_NAME = 'tv_uploads'; 
         let cloudConfig = JSON.parse(localStorage.getItem('cloud_config')) || { cloudName: '', uploadPreset: '' };
         let imageList = JSON.parse(localStorage.getItem('cloud_images')) || [];
 
@@ -176,15 +280,11 @@
 
         // --- Initialization ---
         function init() {
-            lucide.createIcons();
             cloudNameEl.value = cloudConfig.cloudName;
             uploadPresetEl.value = cloudConfig.uploadPreset;
             
-            // Auto Save config
             cloudNameEl.addEventListener('input', saveConfig);
             uploadPresetEl.addEventListener('input', saveConfig);
-            
-            // File Upload Listener
             fileInput.addEventListener('change', handleUpload);
 
             renderGallery();
@@ -208,17 +308,15 @@
 
             uploadBtn.classList.add('hidden');
             uploadLoader.classList.remove('hidden');
-            uploadLoader.classList.add('flex');
 
             const formData = new FormData();
             formData.append('file', file);
             formData.append('upload_preset', cloudConfig.uploadPreset);
-            formData.append('tags', TAG_NAME); // Inject Tag automatically
+            formData.append('tags', TAG_NAME); 
 
             try {
                 const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudConfig.cloudName}/image/upload`, {
-                    method: 'POST',
-                    body: formData
+                    method: 'POST', body: formData
                 });
                 const data = await res.json();
 
@@ -228,59 +326,47 @@
                     public_id: data.public_id,
                     url: data.secure_url,
                     date: new Date().toISOString(),
-                    delete_token: data.delete_token || null // Used to delete from Cloudinary
+                    delete_token: data.delete_token || null 
                 };
 
-                // Add to local list
                 imageList.unshift(newItem);
                 localStorage.setItem('cloud_images', JSON.stringify(imageList));
                 
                 renderGallery();
                 showToast('Upload Successful!', 'success');
-                copyToClipboard(data.secure_url, false); // Auto copy
+                copyToClipboard(data.secure_url, false); 
 
             } catch (err) {
                 showToast(err.message, 'error');
             } finally {
                 fileInput.value = '';
                 uploadLoader.classList.add('hidden');
-                uploadLoader.classList.remove('flex');
                 uploadBtn.classList.remove('hidden');
             }
         }
 
-        // --- Sync (Fetch from Cloudinary Resource List) ---
-        // App delete hone ke baad bhi Cloudinary se data waapis laane ke liye
+        // --- Sync Data ---
         async function syncFromCloudinary() {
             if (!cloudConfig.cloudName) {
-                showToast('Enter Cloud Name to sync data', 'error');
-                return;
+                showToast('Enter Cloud Name first', 'error'); return;
             }
             
             showToast('Syncing with Cloudinary...', 'info');
             
             try {
-                // Cloudinary Client-Side Resource List URL
-                const listUrl = `https://res.cloudinary.com/${cloudConfig.cloudName}/image/list/${TAG_NAME}.json`;
-                
-                // Cache buster for updated list
-                const res = await fetch(listUrl + '?t=' + new Date().getTime());
-                if (!res.ok) throw new Error('Resource List not found. Make sure "Resource List" is ON in Cloudinary Settings.');
+                const listUrl = `https://res.cloudinary.com/${cloudConfig.cloudName}/image/list/${TAG_NAME}.json?t=${new Date().getTime()}`;
+                const res = await fetch(listUrl);
+                if (!res.ok) throw new Error('Resource List not found. Turn it ON in Settings.');
                 
                 const data = await res.json();
-                
                 let isNewDataFound = false;
 
-                // Merge with local list (So we don't lose delete_tokens of recent uploads)
                 data.resources.forEach(resObj => {
                     const exists = imageList.find(img => img.public_id === resObj.public_id);
                     if (!exists) {
                         const url = `https://res.cloudinary.com/${cloudConfig.cloudName}/image/upload/v${resObj.version}/${resObj.public_id}.${resObj.format}`;
                         imageList.push({
-                            public_id: resObj.public_id,
-                            url: url,
-                            date: new Date().toISOString(),
-                            delete_token: null // Fetched data doesn't have token
+                            public_id: resObj.public_id, url: url, date: new Date().toISOString(), delete_token: null
                         });
                         isNewDataFound = true;
                     }
@@ -293,133 +379,110 @@
                 } else {
                     showToast('Already Up-to-date', 'success');
                 }
-
             } catch (err) {
                 showToast(err.message, 'error');
             }
         }
 
-        // --- Delete Logic (Delete from Cloudinary) ---
+        // --- Delete ---
         async function deleteImage(public_id, delete_token) {
-            if (!confirm('Permanently delete this image?')) return;
+            if (!confirm('Delete this image?')) return;
 
-            // Delete from Cloudinary if Token is available (Valid for 10 mins after upload)
             if (delete_token) {
                 try {
                     const formData = new FormData();
                     formData.append('token', delete_token);
-                    await fetch(`https://api.cloudinary.com/v1_1/${cloudConfig.cloudName}/delete_by_token`, {
-                        method: 'POST', body: formData
-                    });
-                    showToast('Deleted from Cloudinary servers!', 'success');
-                } catch(e) {
-                    console.error('Delete token expired or error');
-                }
+                    await fetch(`https://api.cloudinary.com/v1_1/${cloudConfig.cloudName}/delete_by_token`, { method: 'POST', body: formData });
+                    showToast('Deleted from Cloud', 'success');
+                } catch(e) { console.error('Token error'); }
             } else {
-                showToast('Deleted locally. (Token expired for Cloudinary deletion)', 'info');
+                showToast('Deleted locally.', 'info');
             }
 
-            // Remove from local array
             imageList = imageList.filter(img => img.public_id !== public_id);
             localStorage.setItem('cloud_images', JSON.stringify(imageList));
             renderGallery();
         }
 
-        // --- 100% Robust Copy Link Logic ---
+        // --- Copy Link ---
         function copyToClipboard(text, alertUser = true) {
-            // Method 1: Modern Clipboard API
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(text).then(() => {
-                    if(alertUser) showToast('Link Copied 100%!', 'success');
-                }).catch(() => fallbackCopy(text, alertUser));
-            } else {
-                // Method 2: Fallback for older TV Browsers
-                fallbackCopy(text, alertUser);
-            }
-        }
-
-        function fallbackCopy(text, alertUser) {
             const textArea = document.getElementById('copyFallback');
             textArea.value = text;
-            textArea.classList.remove('hidden');
-            textArea.classList.add('block');
+            textArea.classList.remove('sr-only');
+            textArea.style.display = 'block'; 
             textArea.focus();
             textArea.select();
+            
+            let success = false;
             try {
-                document.execCommand('copy');
-                if(alertUser) showToast('Link Copied Successfully!', 'success');
-            } catch (err) {
-                showToast('Copy Failed on this Device', 'error');
+                success = document.execCommand('copy');
+            } catch (err) {}
+            
+            textArea.style.display = 'none';
+            textArea.classList.add('sr-only');
+
+            if (success) {
+                if(alertUser) showToast('Link Copied!', 'success');
+            } else if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    if(alertUser) showToast('Link Copied!', 'success');
+                }).catch(() => { if(alertUser) showToast('Copy Failed', 'error'); });
             }
-            textArea.classList.add('hidden');
-            textArea.classList.remove('block');
         }
 
-        // --- Render UI ---
+        // --- UI Rendering ---
         function renderGallery() {
             if (imageList.length === 0) {
                 galleryGrid.innerHTML = '';
                 emptyState.classList.remove('hidden');
-                emptyState.classList.add('flex');
                 return;
             }
 
             emptyState.classList.add('hidden');
-            emptyState.classList.remove('flex');
             galleryGrid.innerHTML = '';
 
             imageList.forEach((item) => {
                 const card = document.createElement('div');
-                card.className = 'bg-slate-800 rounded-xl p-3 border border-slate-700 flex flex-col gap-3 hover:border-blue-500 transition-colors focus-within:ring-2 focus-within:ring-blue-500';
+                card.className = 'gallery-item';
                 
+                // SVG Icons for buttons
+                const copyIcon = `<svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+                const trashIcon = `<svg class="icon" viewBox="0 0 24 24" style="width:18px;height:18px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
+
                 card.innerHTML = `
-                    <div class="h-40 w-full rounded-lg bg-slate-900 overflow-hidden relative group border border-slate-700">
-                        <img src="${item.url}" class="w-full h-full object-contain" loading="lazy">
-                        <a href="${item.url}" target="_blank" class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity" tabindex="0">
-                            <i data-lucide="external-link" class="w-6 h-6 text-white"></i>
-                        </a>
+                    <div class="img-container">
+                        <img src="${item.url}" loading="lazy">
                     </div>
-                    
-                    <div class="flex items-center gap-2">
-                        <button onclick="copyToClipboard('${item.url}')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                            <i data-lucide="copy" class="w-4 h-4"></i> Copy Link
-                        </button>
-                        <button onclick="deleteImage('${item.public_id}', '${item.delete_token || ''}')" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 p-2 rounded-lg transition-colors border border-red-500/20">
-                            <i data-lucide="trash-2" class="w-5 h-5"></i>
-                        </button>
+                    <div class="item-actions">
+                        <button onclick="copyToClipboard('${item.url}')" class="btn btn-primary" tabindex="0">${copyIcon} Copy</button>
+                        <button onclick="deleteImage('${item.public_id}', '${item.delete_token || ''}')" class="btn btn-delete" tabindex="0">${trashIcon}</button>
                     </div>
                 `;
                 galleryGrid.appendChild(card);
             });
-
-            lucide.createIcons();
         }
 
-        // --- Toast Notification ---
+        // --- Toasts ---
         function showToast(msg, type) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            const isErr = type === 'error';
+            toast.className = `toast ${type}`;
             
-            toast.className = `flex items-center gap-3 px-4 py-3 rounded-lg shadow-xl text-white font-medium transform transition-all translate-x-full duration-300 ${isErr ? 'bg-red-600' : type === 'info' ? 'bg-slate-700' : 'bg-green-600'}`;
+            const icon = type === 'error' ? `<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>` 
+                       : type === 'info' ? `<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`
+                       : `<svg class="icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
             
-            const icon = isErr ? 'alert-circle' : type === 'info' ? 'info' : 'check-circle-2';
-            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i> <span>${msg}</span>`;
-            
+            toast.innerHTML = `${icon} <span>${msg}</span>`;
             container.appendChild(toast);
-            lucide.createIcons();
 
-            // Animate In
-            setTimeout(() => toast.classList.remove('translate-x-full'), 10);
-            
-            // Animate Out & Remove
+            setTimeout(() => toast.classList.add('show'), 10);
             setTimeout(() => {
-                toast.classList.add('translate-x-full');
+                toast.classList.remove('show');
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
 
-        // Run
+        // Start
         init();
     </script>
 </body>
