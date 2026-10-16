@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Premium Cloudinary Vault</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS (Stable CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { darkBg: '#0f172a', cardBg: '#1e293b' }
+                }
+            }
+        }
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        
+        /* TV Focus Styles (For D-Pad Navigation on Android TV) */
+        button:focus, input:focus, a:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.8);
+            transform: scale(1.02);
+            transition: all 0.2s ease;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        .glass-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .loader {
+            border: 4px solid #334155; border-top-color: #3b82f6;
+            border-radius: 50%; width: 24px; height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3"></div>
+
+    <div class="max-w-6xl mx-auto">
+        
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row items-center justify-between mb-8 gap-4 bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
+            <div class="flex items-center gap-4">
+                <div class="bg-blue-600 p-3 rounded-xl shadow-lg shadow-blue-500/30">
+                    <i data-lucide="cloud-lightning" class="w-8 h-8 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-white">Cloudinary Pro</h1>
+                    <p class="text-sm text-gray-400">TV & Mobile Optimized Storage</p>
+                </div>
+            </div>
+            <button onclick="syncFromCloudinary()" class="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-white font-medium transition-colors">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i> Sync Cloud Data
+            </button>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Left: Settings & Upload -->
+            <div class="lg:col-span-4 space-y-6">
+                
+                <!-- Setup Card -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
+                        <i data-lucide="settings" class="w-5 h-5 text-blue-400"></i> API Config
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1.5 text-gray-300">Cloud Name</label>
+                            <input type="text" id="cloudName" placeholder="e.g., dyxhxyz" 
+                                class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:border-blue-500 transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1.5 text-gray-300">Upload Preset</label>
+                            <input type="text" id="uploadPreset" placeholder="e.g., my_preset" 
+                                class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:border-blue-500 transition-colors">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload Card -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
+                        <i data-lucide="upload" class="w-5 h-5 text-green-400"></i> Upload Image
+                    </h2>
+                    
+                    <input type="file" id="fileInput" class="hidden" accept="image/*">
+                    <button id="uploadBtn" onclick="document.getElementById('fileInput').click()" 
+                        class="w-full border-2 border-dashed border-slate-500 hover:border-blue-500 bg-slate-800 hover:bg-slate-700 rounded-xl p-8 text-center transition-all group flex flex-col items-center">
+                        <i data-lucide="image-plus" class="w-10 h-10 text-slate-400 group-hover:text-blue-400 mb-3"></i>
+                        <span class="text-white font-medium text-lg">Select Image</span>
+                        <span class="text-sm text-slate-400 mt-1">or Click to Browse (TV Friendly)</span>
+                    </button>
+
+                    <!-- Uploading Loader -->
+                    <div id="uploadLoader" class="hidden mt-4 p-4 bg-slate-800 rounded-xl border border-slate-600 flex items-center justify-center gap-3">
+                        <div class="loader"></div>
+                        <span class="text-white font-medium">Uploading to Cloud...</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right: Gallery -->
+            <div class="lg:col-span-8">
+                <div class="glass-card rounded-2xl p-6 min-h-[500px]">
+                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-700">
+                        <h2 class="text-xl font-semibold flex items-center gap-2 text-white">
+                            <i data-lucide="grid" class="w-6 h-6 text-purple-400"></i> Cloud Gallery
+                        </h2>
+                        <span class="text-xs text-slate-400 bg-slate-800 px-3 py-1 rounded-full">Tag: tv_uploads</span>
+                    </div>
+
+                    <!-- Gallery Grid -->
+                    <div id="galleryGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Items inject dynamically -->
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="emptyState" class="hidden flex-col items-center justify-center py-20">
+                        <i data-lucide="folder-open" class="w-16 h-16 text-slate-600 mb-4"></i>
+                        <p class="text-lg text-slate-300 font-medium">No images found</p>
+                        <p class="text-sm text-slate-500 mt-1">Upload an image or Sync Cloud Data</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Hidden Textarea for Copy Fallback -->
+    <textarea id="copyFallback" class="hidden"></textarea>
+
+    <script>
+        // --- Core Variables ---
+        const TAG_NAME = 'tv_uploads'; // Cloudinary resource list tag
+        let cloudConfig = JSON.parse(localStorage.getItem('cloud_config')) || { cloudName: '', uploadPreset: '' };
+        let imageList = JSON.parse(localStorage.getItem('cloud_images')) || [];
+
+        // --- Elements ---
+        const cloudNameEl = document.getElementById('cloudName');
+        const uploadPresetEl = document.getElementById('uploadPreset');
+        const fileInput = document.getElementById('fileInput');
+        const galleryGrid = document.getElementById('galleryGrid');
+        const emptyState = document.getElementById('emptyState');
+        const uploadLoader = document.getElementById('uploadLoader');
+        const uploadBtn = document.getElementById('uploadBtn');
+
+        // --- Initialization ---
+        function init() {
+            lucide.createIcons();
+            cloudNameEl.value = cloudConfig.cloudName;
+            uploadPresetEl.value = cloudConfig.uploadPreset;
+            
+            // Auto Save config
+            cloudNameEl.addEventListener('input', saveConfig);
+            uploadPresetEl.addEventListener('input', saveConfig);
+            
+            // File Upload Listener
+            fileInput.addEventListener('change', handleUpload);
+
+            renderGallery();
+        }
+
+        function saveConfig() {
+            cloudConfig.cloudName = cloudNameEl.value.trim();
+            cloudConfig.uploadPreset = uploadPresetEl.value.trim();
+            localStorage.setItem('cloud_config', JSON.stringify(cloudConfig));
+        }
+
+        // --- Upload Logic ---
+        async function handleUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (!cloudConfig.cloudName || !cloudConfig.uploadPreset) {
+                showToast('Cloud Name & Upload Preset Required!', 'error');
+                return;
+            }
+
+            uploadBtn.classList.add('hidden');
+            uploadLoader.classList.remove('hidden');
+            uploadLoader.classList.add('flex');
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', cloudConfig.uploadPreset);
+            formData.append('tags', TAG_NAME); // Inject Tag automatically
+
+            try {
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudConfig.cloudName}/image/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (data.error) throw new Error(data.error.message);
+
+                const newItem = {
+                    public_id: data.public_id,
+                    url: data.secure_url,
+                    date: new Date().toISOString(),
+                    delete_token: data.delete_token || null // Used to delete from Cloudinary
+                };
+
+                // Add to local list
+                imageList.unshift(newItem);
+                localStorage.setItem('cloud_images', JSON.stringify(imageList));
+                
+                renderGallery();
+                showToast('Upload Successful!', 'success');
+                copyToClipboard(data.secure_url, false); // Auto copy
+
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                fileInput.value = '';
+                uploadLoader.classList.add('hidden');
+                uploadLoader.classList.remove('flex');
+                uploadBtn.classList.remove('hidden');
+            }
+        }
+
+        // --- Sync (Fetch from Cloudinary Resource List) ---
+        // App delete hone ke baad bhi Cloudinary se data waapis laane ke liye
+        async function syncFromCloudinary() {
+            if (!cloudConfig.cloudName) {
+                showToast('Enter Cloud Name to sync data', 'error');
+                return;
+            }
+            
+            showToast('Syncing with Cloudinary...', 'info');
+            
+            try {
+                // Cloudinary Client-Side Resource List URL
+                const listUrl = `https://res.cloudinary.com/${cloudConfig.cloudName}/image/list/${TAG_NAME}.json`;
+                
+                // Cache buster for updated list
+                const res = await fetch(listUrl + '?t=' + new Date().getTime());
+                if (!res.ok) throw new Error('Resource List not found. Make sure "Resource List" is ON in Cloudinary Settings.');
+                
+                const data = await res.json();
+                
+                let isNewDataFound = false;
+
+                // Merge with local list (So we don't lose delete_tokens of recent uploads)
+                data.resources.forEach(resObj => {
+                    const exists = imageList.find(img => img.public_id === resObj.public_id);
+                    if (!exists) {
+                        const url = `https://res.cloudinary.com/${cloudConfig.cloudName}/image/upload/v${resObj.version}/${resObj.public_id}.${resObj.format}`;
+                        imageList.push({
+                            public_id: resObj.public_id,
+                            url: url,
+                            date: new Date().toISOString(),
+                            delete_token: null // Fetched data doesn't have token
+                        });
+                        isNewDataFound = true;
+                    }
+                });
+
+                if (isNewDataFound) {
+                    localStorage.setItem('cloud_images', JSON.stringify(imageList));
+                    renderGallery();
+                    showToast('Cloud Data Synced!', 'success');
+                } else {
+                    showToast('Already Up-to-date', 'success');
+                }
+
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        // --- Delete Logic (Delete from Cloudinary) ---
+        async function deleteImage(public_id, delete_token) {
+            if (!confirm('Permanently delete this image?')) return;
+
+            // Delete from Cloudinary if Token is available (Valid for 10 mins after upload)
+            if (delete_token) {
+                try {
+                    const formData = new FormData();
+                    formData.append('token', delete_token);
+                    await fetch(`https://api.cloudinary.com/v1_1/${cloudConfig.cloudName}/delete_by_token`, {
+                        method: 'POST', body: formData
+                    });
+                    showToast('Deleted from Cloudinary servers!', 'success');
+                } catch(e) {
+                    console.error('Delete token expired or error');
+                }
+            } else {
+                showToast('Deleted locally. (Token expired for Cloudinary deletion)', 'info');
+            }
+
+            // Remove from local array
+            imageList = imageList.filter(img => img.public_id !== public_id);
+            localStorage.setItem('cloud_images', JSON.stringify(imageList));
+            renderGallery();
+        }
+
+        // --- 100% Robust Copy Link Logic ---
+        function copyToClipboard(text, alertUser = true) {
+            // Method 1: Modern Clipboard API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    if(alertUser) showToast('Link Copied 100%!', 'success');
+                }).catch(() => fallbackCopy(text, alertUser));
+            } else {
+                // Method 2: Fallback for older TV Browsers
+                fallbackCopy(text, alertUser);
+            }
+        }
+
+        function fallbackCopy(text, alertUser) {
+            const textArea = document.getElementById('copyFallback');
+            textArea.value = text;
+            textArea.classList.remove('hidden');
+            textArea.classList.add('block');
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                if(alertUser) showToast('Link Copied Successfully!', 'success');
+            } catch (err) {
+                showToast('Copy Failed on this Device', 'error');
+            }
+            textArea.classList.add('hidden');
+            textArea.classList.remove('block');
+        }
+
+        // --- Render UI ---
+        function renderGallery() {
+            if (imageList.length === 0) {
+                galleryGrid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            emptyState.classList.remove('flex');
+            galleryGrid.innerHTML = '';
+
+            imageList.forEach((item) => {
+                const card = document.createElement('div');
+                card.className = 'bg-slate-800 rounded-xl p-3 border border-slate-700 flex flex-col gap-3 hover:border-blue-500 transition-colors focus-within:ring-2 focus-within:ring-blue-500';
+                
+                card.innerHTML = `
+                    <div class="h-40 w-full rounded-lg bg-slate-900 overflow-hidden relative group border border-slate-700">
+                        <img src="${item.url}" class="w-full h-full object-contain" loading="lazy">
+                        <a href="${item.url}" target="_blank" class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity" tabindex="0">
+                            <i data-lucide="external-link" class="w-6 h-6 text-white"></i>
+                        </a>
+                    </div>
+                    
+                    <div class="flex items-center gap-2">
+                        <button onclick="copyToClipboard('${item.url}')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                            <i data-lucide="copy" class="w-4 h-4"></i> Copy Link
+                        </button>
+                        <button onclick="deleteImage('${item.public_id}', '${item.delete_token || ''}')" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 p-2 rounded-lg transition-colors border border-red-500/20">
+                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                `;
+                galleryGrid.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        // --- Toast Notification ---
+        function showToast(msg, type) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const isErr = type === 'error';
+            
+            toast.className = `flex items-center gap-3 px-4 py-3 rounded-lg shadow-xl text-white font-medium transform transition-all translate-x-full duration-300 ${isErr ? 'bg-red-600' : type === 'info' ? 'bg-slate-700' : 'bg-green-600'}`;
+            
+            const icon = isErr ? 'alert-circle' : type === 'info' ? 'info' : 'check-circle-2';
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i> <span>${msg}</span>`;
+            
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            // Animate In
+            setTimeout(() => toast.classList.remove('translate-x-full'), 10);
+            
+            // Animate Out & Remove
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Run
+        init();
+    </script>
+</body>
+</html>
