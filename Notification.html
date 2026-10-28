@@ -1,541 +1,349 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Browser Notification Tester</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <!-- Google Fonts: Inter -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-          },
-          colors: {
-            brand: {
-              50: '#eef2ff',
-              100: '#e0e7ff',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-            }
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ब्राउज़र नोटिफिकेशन जनरेटर</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
         }
-      }
-    }
-  </script>
-
-  <style>
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(156, 163, 175, 0.4);
-      border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(156, 163, 175, 0.7);
-    }
-    
-    /* Toast Animation */
-    @keyframes slideIn {
-      from {
-        transform: translateY(-100%) scale(0.95);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0) scale(1);
-        opacity: 1;
-      }
-    }
-    .toast-animate {
-      animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-  </style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen font-sans antialiased flex flex-col justify-between selection:bg-brand-500 selection:text-white">
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between">
 
-  <!-- In-App Toast Fallback Container (Top Right) -->
-  <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
-
-  <!-- Header Banner -->
-  <header class="border-b border-slate-800 bg-slate-950/60 backdrop-blur-md sticky top-0 z-40">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="h-10 w-10 rounded-xl bg-brand-600/20 text-brand-500 flex items-center justify-center border border-brand-500/30">
-          <i class="fa-solid font-bold fa-bell text-xl"></i>
+    <!-- Header -->
+    <header class="bg-indigo-600 text-white shadow-lg py-4 px-6 mb-8">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-bell text-2xl text-yellow-300 animate-bounce"></i>
+                <h1 class="text-xl md:text-2xl font-bold">ब्राउज़र नोटिफिकेशन टेस्टर</h1>
+            </div>
+            <span id="permission-badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-700 shadow-sm flex items-center gap-1">
+                <i class="fa-solid fa-spinner fa-spin"></i> जाँच की जा रही है...
+            </span>
         </div>
-        <div>
-          <h1 class="text-lg font-bold text-white leading-tight">Notification Tester</h1>
-          <p class="text-xs text-slate-400">Real-time Web Push & Notification API Tool</p>
-        </div>
-      </div>
+    </header>
 
-      <!-- Permission Status Badge Header -->
-      <div id="headerStatusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/80 text-xs font-medium text-slate-300">
-        <span class="relative flex h-2.5 w-2.5">
-          <span id="badgePing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-          <span id="badgeDot" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
-        </span>
-        <span id="permissionText">Checking Permission...</span>
-      </div>
-    </div>
-  </header>
-
-  <!-- Main Container -->
-  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow">
-    
-    <!-- Permission Warning / Callout Banner -->
-    <div id="permissionNotice" class="mb-8 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all">
-      <div class="flex items-start gap-3">
-        <div class="p-2 rounded-lg bg-amber-500/20 text-amber-400 mt-0.5 sm:mt-0">
-          <i class="fa-solid fa-triangle-exclamation text-lg"></i>
-        </div>
-        <div>
-          <h3 class="text-sm font-semibold text-amber-200">Browser Permission Required</h3>
-          <p class="text-xs text-amber-300/80 mt-0.5">Enable notification permissions to test native system popups. If blocked, fallbacks will render in-app.</p>
-        </div>
-      </div>
-      <button id="btnRequestPermission" onclick="requestNotificationPermission()" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs transition duration-200 shadow-lg shadow-amber-500/20 shrink-0 flex items-center justify-center gap-2">
-        <i class="fa-solid fa-key"></i> Enable Permission
-      </button>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      
-      <!-- Left Column: Notification Generator Form -->
-      <div class="lg:col-span-7 flex flex-col gap-6">
-        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
-          <div class="flex items-center justify-between border-b border-slate-800/80 pb-4 mb-6">
-            <h2 class="text-base font-semibold text-white flex items-center gap-2">
-              <i class="fa-solid fa-sliders text-brand-500"></i> Notification Parameters
-            </h2>
-            <div class="flex gap-2">
-              <button onclick="loadPreset('welcome')" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">Preset 1</button>
-              <button onclick="loadPreset('alert')" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">Preset 2</button>
-            </div>
-          </div>
-
-          <form id="notificationForm" onsubmit="handleSendNotification(event)" class="space-y-5">
-            <!-- Title Field -->
-            <div>
-              <label for="inputTitle" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                Notification Title <span class="text-rose-400">*</span>
-              </label>
-              <div class="relative">
-                <input type="text" id="inputTitle" required
-                  value="🚀 System Update Available"
-                  placeholder="Enter notification title"
-                  class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition" />
-              </div>
-            </div>
-
-            <!-- Body Message Field -->
-            <div>
-              <label for="inputBody" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                Message Body <span class="text-rose-400">*</span>
-              </label>
-              <textarea id="inputBody" rows="3" required
-                placeholder="Enter notification body text..."
-                class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition resize-none">Version 2.4 is live! Experience real-time notification testing with custom icons and custom delays.</textarea>
-            </div>
-
-            <!-- Image/Icon URL Field -->
-            <div>
-              <label for="inputIcon" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                Icon / Image URL <span class="text-slate-500 font-normal">(Optional)</span>
-              </label>
-              <div class="flex gap-2">
-                <input type="url" id="inputIcon"
-                  value="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&auto=format&fit=crop&q=80"
-                  placeholder="https://example.com/icon.png"
-                  class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition" />
-                <button type="button" onclick="previewImage()" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-xl transition flex items-center gap-1.5 shrink-0">
-                  <i class="fa-solid fa-eye"></i> Preview
-                </button>
-              </div>
-            </div>
-
-            <!-- Advanced Controls: Delay & Vibration -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-              <!-- Delay Select -->
-              <div>
-                <label for="selectDelay" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                  Send Delay
-                </label>
-                <select id="selectDelay" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
-                  <option value="0">Instant (0 seconds)</option>
-                  <option value="3">Delay 3 seconds</option>
-                  <option value="5">Delay 5 seconds</option>
-                  <option value="10">Delay 10 seconds</option>
-                </select>
-              </div>
-
-              <!-- Extra Feature Options -->
-              <div>
-                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                  Options
-                </label>
-                <div class="flex items-center gap-4 py-2">
-                  <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-300">
-                    <input type="checkbox" id="checkRequireInteraction" class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-brand-600 focus:ring-brand-500 focus:ring-offset-slate-900" />
-                    Require Interaction
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-300">
-                    <input type="checkbox" id="checkSilent" class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-brand-600 focus:ring-brand-500 focus:ring-offset-slate-900" />
-                    Silent Mode
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="pt-4 flex flex-col sm:flex-row gap-3">
-              <button type="submit" id="btnSend" class="flex-1 bg-brand-600 hover:bg-brand-500 text-white font-semibold py-3 px-6 rounded-xl shadow-lg shadow-brand-600/30 transition duration-200 flex items-center justify-center gap-2">
-                <i class="fa-solid fa-paper-plane"></i> Send Test Notification
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- Right Column: Interactive Live Preview & Real-Time Log -->
-      <div class="lg:col-span-5 flex flex-col gap-6">
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto px-4 flex-grow w-full">
         
-        <!-- Interactive Visual Card Preview -->
-        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
-          <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-            <i class="fa-solid fa-desktop text-slate-400"></i> Visual Mockup Preview
-          </h2>
-          
-          <div class="bg-slate-900/90 border border-slate-700/60 rounded-xl p-4 shadow-lg flex gap-3.5 items-start relative overflow-hidden">
-            <div id="previewIconBox" class="w-11 h-11 rounded-lg bg-slate-800 overflow-hidden shrink-0 border border-slate-700/80 flex items-center justify-center">
-              <img id="previewImageEl" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&auto=format&fit=crop&q=80" alt="Icon Preview" class="w-full h-full object-cover" onerror="this.style.display='none'; document.getElementById('previewFallbackIcon').style.display='block';" />
-              <i id="previewFallbackIcon" class="fa-solid fa-bell text-slate-500 text-lg hidden"></i>
+        <!-- Status Alert Box -->
+        <div id="status-box" class="hidden mb-6 p-4 rounded-xl border flex items-start space-x-3 shadow-sm transition-all duration-300">
+            <i id="status-icon" class="text-xl mt-0.5"></i>
+            <div class="flex-1">
+                <h4 id="status-title" class="font-semibold text-sm"></h4>
+                <p id="status-desc" class="text-xs mt-0.5"></p>
             </div>
-            <div class="flex-1 min-w-0 pr-4">
-              <div class="flex items-center justify-between">
-                <h4 id="previewTitle" class="text-sm font-semibold text-slate-100 truncate">🚀 System Update Available</h4>
-                <span class="text-[10px] text-slate-500">Now</span>
-              </div>
-              <p id="previewBody" class="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">Version 2.4 is live! Experience real-time notification testing with custom icons and custom delays.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Real-Time Activity Log -->
-        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm flex-1 flex flex-col">
-          <div class="flex items-center justify-between border-b border-slate-800/80 pb-4 mb-4">
-            <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-              <i class="fa-solid fa-list-check text-slate-400"></i> Notification Log
-            </h2>
-            <button onclick="clearLogs()" class="text-[11px] text-slate-400 hover:text-slate-200 transition flex items-center gap-1">
-              <i class="fa-solid fa-trash-can"></i> Clear
+            <button id="perm-btn" onclick="requestNotificationPermission()" class="hidden text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg transition-colors shadow">
+                अनुमति दें (Request Permission)
             </button>
-          </div>
+        </div>
 
-          <div id="logContainer" class="space-y-2.5 overflow-y-auto max-h-[280px] pr-1 flex-1">
-            <div id="emptyLogState" class="text-center py-8 text-slate-500 text-xs">
-              <i class="fa-solid fa-clock-rotate-left text-2xl mb-2 text-slate-600 block"></i>
-              No notifications triggered yet.
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Left Column: Controls & Form -->
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800 mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square text-indigo-500"></i> नोटिफिकेशन विवरण (Details)
+                    </h2>
+
+                    <!-- Title Input -->
+                    <div class="mb-4">
+                        <label for="notif-title" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">
+                            शीर्षक (Title) *
+                        </label>
+                        <input type="text" id="notif-title" value="नया संदेश प्राप्त हुआ!" 
+                            placeholder="उदाहरण: ऑफ़र अपडेट" 
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-sm">
+                    </div>
+
+                    <!-- Message Body Input -->
+                    <div class="mb-4">
+                        <label for="notif-body" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">
+                            संदेश विवरण (Body Message)
+                        </label>
+                        <textarea id="notif-body" rows="3" 
+                            placeholder="यहाँ अपना संदेश दर्ज करें..." 
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-sm resize-none">आपके खाते में नया अपडेट उपलब्ध है। अभी देखने के लिए यहाँ क्लिक करें।</textarea>
+                    </div>
+
+                    <!-- Icon / Image URL Input -->
+                    <div class="mb-4">
+                        <label for="notif-icon" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">
+                            आइकन/इमेज URL (Icon / Image)
+                        </label>
+                        <div class="relative">
+                            <input type="url" id="notif-icon" value="https://cdn-icons-png.flaticon.com/512/3119/3119338.png" 
+                                placeholder="https://example.com/icon.png" 
+                                class="w-full pl-4 pr-10 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-sm">
+                            <i class="fa-solid fa-image absolute right-3 top-3 text-slate-400"></i>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-1">नोट: पारदर्शी PNG या वर्गाकार (Square) इमेज सबसे अच्छी दिखती है।</p>
+                    </div>
+
+                    <!-- Preset Options -->
+                    <div class="mb-6">
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">त्वरित नमूने (Presets)</label>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="applyPreset('msg')" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-lg border border-slate-200 transition">💬 चैट मैसेज</button>
+                            <button onclick="applyPreset('offer')" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-lg border border-slate-200 transition">🏷️ विशेष ऑफ़र</button>
+                            <button onclick="applyPreset('alert')" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-lg border border-slate-200 transition">⚠️ सुरक्षा चेतावनी</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <button id="send-btn" onclick="sendNotification()" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-semibold py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>टेस्ट नोटिफिकेशन भेजें (Send Test Notification)</span>
+                </button>
             </div>
-          </div>
+
+            <!-- Right Column: Live Preview & Instructions -->
+            <div class="flex flex-col space-y-6">
+                
+                <!-- Live Preview Card -->
+                <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-eye text-indigo-500"></i> लाइव पूर्वावलोकन (Live Preview)
+                    </h2>
+                    
+                    <p class="text-xs text-slate-500 mb-3">ऑपरेटिंग सिस्टम और ब्राउज़र के अनुसार इसकी बनावट थोड़ी भिन्न हो सकती है:</p>
+
+                    <!-- Mock Browser Notification Card -->
+                    <div class="bg-slate-900 text-white p-4 rounded-xl shadow-xl border border-slate-700 relative overflow-hidden">
+                        <div class="flex items-start space-x-3">
+                            <!-- Icon Preview -->
+                            <div class="w-12 h-12 rounded-lg bg-slate-800 border border-slate-700 flex-shrink-0 overflow-hidden flex items-center justify-center">
+                                <img id="preview-icon" src="https://cdn-icons-png.flaticon.com/512/3119/3119338.png" alt="Icon" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/334155/ffffff?text=Icon'">
+                            </div>
+                            
+                            <!-- Content Preview -->
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-center mb-1">
+                                    <h3 id="preview-title" class="font-semibold text-sm text-slate-100 truncate">नया संदेश प्राप्त हुआ!</h3>
+                                    <span class="text-[10px] text-slate-400">अभी</span>
+                                </div>
+                                <p id="preview-body" class="text-xs text-slate-300 line-clamp-2 leading-relaxed">
+                                    आपके खाते में नया अपडेट उपलब्ध है। अभी देखने के लिए यहाँ क्लिक करें।
+                                </p>
+                                <span class="inline-block text-[10px] text-slate-500 mt-2">your-website.com • Chrome/Edge</span>
+                            </div>
+                            
+                            <!-- Close Icon Mock -->
+                            <span class="text-slate-500 text-xs hover:text-slate-300 cursor-pointer">&times;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Guidelines Card -->
+                <div class="bg-indigo-50/60 p-5 rounded-2xl border border-indigo-100">
+                    <h3 class="text-sm font-bold text-indigo-900 mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-info text-indigo-600"></i> महत्वपूर्ण जानकारी:
+                    </h3>
+                    <ul class="text-xs text-indigo-800 space-y-1.5 list-disc pl-4">
+                        <li>यह टूल आपके ब्राउज़र के आधिकारिक <strong>Notification API</strong> का उपयोग करता है।</li>
+                        <li>यदि नोटिफिकेशन नहीं दिख रहा है, तो जांचें कि आपके ऑपरेटिंग सिस्टम (Windows/Mac/Android) में <strong>Focus Assist</strong> या <strong>Do Not Disturb</strong> ऑन तो नहीं है।</li>
+                        <li>साइट सेटिंग्स से नोटिफिकेशन ब्लॉक होने पर आपको ब्राउज़र एड्रेस बार में लॉक (🔒) आइकन पर क्लिक करके अनुमति बदलनी होगी।</li>
+                    </ul>
+                </div>
+
+            </div>
+
         </div>
+    </main>
 
-      </div>
+    <!-- Footer -->
+    <footer class="mt-12 py-4 bg-white border-t border-slate-200 text-center text-xs text-slate-500">
+        ब्राउज़र नोटिफिकेशन टेस्टिंग प्लेटफ़ॉर्म • HTML5 Web APIs
+    </footer>
 
-    </div>
-  </main>
+    <!-- JavaScript logic -->
+    <script>
+        // DOM Elements
+        const titleInput = document.getElementById('notif-title');
+        const bodyInput = document.getElementById('notif-body');
+        const iconInput = document.getElementById('notif-icon');
 
-  <!-- Footer -->
-  <footer class="border-t border-slate-800/60 py-4 bg-slate-950/40 text-center text-xs text-slate-500">
-    <div class="max-w-6xl mx-auto px-4">
-      Built for Browser Notification API testing • Works locally and over HTTPS
-    </div>
-  </footer>
+        const previewTitle = document.getElementById('preview-title');
+        const previewBody = document.getElementById('preview-body');
+        const previewIcon = document.getElementById('preview-icon');
 
-  <script>
-    // --- State & Initialization ---
-    let logHistory = [];
+        const statusBox = document.getElementById('status-box');
+        const statusIcon = document.getElementById('status-icon');
+        const statusTitle = document.getElementById('status-title');
+        const statusDesc = document.getElementById('status-desc');
+        const permBtn = document.getElementById('perm-btn');
+        const permissionBadge = document.getElementById('permission-badge');
 
-    window.addEventListener('DOMContentLoaded', () => {
-      checkNotificationSupport();
-      setupLivePreview();
-    });
-
-    // --- Live Form Preview Sync ---
-    function setupLivePreview() {
-      const titleInput = document.getElementById('inputTitle');
-      const bodyInput = document.getElementById('inputBody');
-      const iconInput = document.getElementById('inputIcon');
-
-      titleInput.addEventListener('input', (e) => {
-        document.getElementById('previewTitle').textContent = e.target.value || 'Notification Title';
-      });
-
-      bodyInput.addEventListener('input', (e) => {
-        document.getElementById('previewBody').textContent = e.target.value || 'Message body content...';
-      });
-
-      iconInput.addEventListener('input', (e) => {
-        updatePreviewIcon(e.target.value);
-      });
-    }
-
-    function updatePreviewIcon(url) {
-      const img = document.getElementById('previewImageEl');
-      const fallback = document.getElementById('previewFallbackIcon');
-
-      if (url.trim()) {
-        img.src = url;
-        img.style.display = 'block';
-        fallback.style.display = 'none';
-      } else {
-        img.style.display = 'none';
-        fallback.style.display = 'block';
-      }
-    }
-
-    function previewImage() {
-      const url = document.getElementById('inputIcon').value;
-      updatePreviewIcon(url);
-    }
-
-    // --- Permission & Status Logic ---
-    function checkNotificationSupport() {
-      if (!('Notification' in window)) {
-        updatePermissionUI('unsupported');
-        return;
-      }
-      updatePermissionUI(Notification.permission);
-    }
-
-    function updatePermissionUI(permission) {
-      const badgePing = document.getElementById('badgePing');
-      const badgeDot = document.getElementById('badgeDot');
-      const permissionText = document.getElementById('permissionText');
-      const permissionNotice = document.getElementById('permissionNotice');
-
-      if (permission === 'granted') {
-        badgePing.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75';
-        badgeDot.className = 'relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500';
-        permissionText.textContent = 'Permission Granted';
-        permissionText.className = 'text-emerald-400 font-medium';
-        permissionNotice.classList.add('hidden');
-      } else if (permission === 'denied') {
-        badgePing.className = 'hidden';
-        badgeDot.className = 'relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500';
-        permissionText.textContent = 'Permission Denied';
-        permissionText.className = 'text-rose-400 font-medium';
-        permissionNotice.classList.remove('hidden');
-        permissionNotice.className = 'mb-8 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4';
-      } else if (permission === 'unsupported') {
-        badgePing.className = 'hidden';
-        badgeDot.className = 'relative inline-flex rounded-full h-2.5 w-2.5 bg-slate-500';
-        permissionText.textContent = 'Not Supported';
-        permissionNotice.classList.remove('hidden');
-      } else {
-        // default / prompt state
-        badgePing.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75';
-        badgeDot.className = 'relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500';
-        permissionText.textContent = 'Permission Needed';
-        permissionNotice.classList.remove('hidden');
-      }
-    }
-
-    async function requestNotificationPermission() {
-      if (!('Notification' in window)) {
-        showToast('Browser Unsupported', 'Native Web Notifications are not supported in this browser.', 'error');
-        return;
-      }
-
-      try {
-        const permission = await Notification.requestPermission();
-        updatePermissionUI(permission);
-        if (permission === 'granted') {
-          showToast('Permission Granted!', 'You can now receive native system notifications.', 'success');
-        } else if (permission === 'denied') {
-          showToast('Permission Denied', 'Notifications were blocked in browser settings.', 'warning');
+        // Update Live Preview on Input Change
+        function updatePreview() {
+            previewTitle.textContent = titleInput.value.trim() || 'कोई शीर्षक नहीं';
+            previewBody.textContent = bodyInput.value.trim() || 'कोई संदेश नहीं';
+            previewIcon.src = iconInput.value.trim() || 'https://placehold.co/100x100/334155/ffffff?text=Icon';
         }
-      } catch (err) {
-        console.error('Permission request error:', err);
-      }
-    }
 
-    // --- Preset Handlers ---
-    function loadPreset(type) {
-      if (type === 'welcome') {
-        document.getElementById('inputTitle').value = '👋 Welcome Aboard!';
-        document.getElementById('inputBody').value = 'Thank you for testing browser push notifications.';
-        document.getElementById('inputIcon').value = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80';
-      } else if (type === 'alert') {
-        document.getElementById('inputTitle').value = '⚠️ Security Alert';
-        document.getElementById('inputBody').value = 'New sign-in detected from an unknown device.';
-        document.getElementById('inputIcon').value = 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=150&auto=format&fit=crop&q=80';
-      }
-      setupLivePreview();
-      document.getElementById('inputTitle').dispatchEvent(new Event('input'));
-    }
+        titleInput.addEventListener('input', updatePreview);
+        bodyInput.addEventListener('input', updatePreview);
+        iconInput.addEventListener('input', updatePreview);
 
-    // --- Notification Trigger Logic ---
-    function handleSendNotification(e) {
-      e.preventDefault();
+        // Check Browser Support & Current Permission Status
+        function checkNotificationSupport() {
+            if (!("Notification" in window)) {
+                showStatus(
+                    'error', 
+                    'नोटिफिकेशन सपोर्टेड नहीं है', 
+                    'आपका ब्राउज़र Web Notifications API को सपोर्ट नहीं करता है।'
+                );
+                updateBadge('असमर्थ (Unsupported)', 'bg-red-100', 'text-red-700');
+                return false;
+            }
 
-      const title = document.getElementById('inputTitle').value;
-      const body = document.getElementById('inputBody').value;
-      const icon = document.getElementById('inputIcon').value;
-      const delay = parseInt(document.getElementById('selectDelay').value, 10);
-      const requireInteraction = document.getElementById('checkRequireInteraction').checked;
-      const silent = document.getElementById('checkSilent').checked;
+            const currentPermission = Notification.permission;
 
-      const btnSend = document.getElementById('btnSend');
-
-      if (delay > 0) {
-        // Delayed Execution
-        let remaining = delay;
-        btnSend.disabled = true;
-        btnSend.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Triggering in ${remaining}s...`;
-
-        const countdown = setInterval(() => {
-          remaining--;
-          if (remaining > 0) {
-            btnSend.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Triggering in ${remaining}s...`;
-          } else {
-            clearInterval(countdown);
-            btnSend.disabled = false;
-            btnSend.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Send Test Notification`;
-            triggerNotification({ title, body, icon, requireInteraction, silent });
-          }
-        }, 1000);
-      } else {
-        // Immediate Execution
-        triggerNotification({ title, body, icon, requireInteraction, silent });
-      }
-    }
-
-    function triggerNotification(options) {
-      const now = new Date().toLocaleTimeString();
-
-      // Check if native Notification can be used
-      if ('Notification' in window && Notification.permission === 'granted') {
-        try {
-          const notification = new Notification(options.title, {
-            body: options.body,
-            icon: options.icon || undefined,
-            requireInteraction: options.requireInteraction,
-            silent: options.silent,
-          });
-
-          notification.onclick = () => {
-            window.focus();
-            notification.close();
-          };
-
-          addLogEntry(options.title, 'Native Sent', 'success', now);
-          showToast(options.title, options.body, 'info', options.icon);
-        } catch (err) {
-          console.error('Native notification error:', err);
-          addLogEntry(options.title, 'Fallback (Error)', 'error', now);
-          showToast(options.title, options.body, 'info', options.icon);
+            if (currentPermission === "granted") {
+                showStatus(
+                    'success', 
+                    'अनुमति प्राप्त है (Permission Granted)', 
+                    'आप नोटिफिकेशन भेज सकते हैं।'
+                );
+                updateBadge('अनुमति प्राप्त', 'bg-emerald-100', 'text-emerald-700');
+                permBtn.classList.add('hidden');
+            } else if (currentPermission === "denied") {
+                showStatus(
+                    'denied', 
+                    'अनुमति अवरुद्ध है (Permission Blocked)', 
+                    'आपने इस साइट के लिए नोटिफिकेशन ब्लॉक किया है। इसे चालू करने के लिए ब्राउज़र के एड्रेस बार में लॉक (🔒) आइकन पर क्लिक करें।'
+                );
+                updateBadge('ब्लॉक किया गया', 'bg-red-100', 'text-red-700');
+                permBtn.classList.add('hidden');
+            } else {
+                showStatus(
+                    'warning', 
+                    'अनुमति आवश्यक है (Permission Needed)', 
+                    'नोटिफिकेशन भेजने से पहले आपको ब्राउज़र से अनुमति देनी होगी।'
+                );
+                updateBadge('अनुमति लंबित', 'bg-amber-100', 'text-amber-700');
+                permBtn.classList.remove('hidden');
+            }
+            return true;
         }
-      } else {
-        // Fallback In-App Toast Notification
-        addLogEntry(options.title, 'In-App Fallback', 'warning', now);
-        showToast(options.title, options.body, 'warning', options.icon);
-      }
-    }
 
-    // --- In-App Toast Notification Banner ---
-    function showToast(title, message, type = 'info', iconUrl = '') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      toast.className = 'toast-animate pointer-events-auto bg-slate-900 border border-slate-700/90 rounded-xl p-4 shadow-2xl flex items-start gap-3 relative overflow-hidden backdrop-blur-md';
+        // Display Status Messages
+        function showStatus(type, title, message) {
+            statusBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'bg-amber-50', 'border-amber-200', 'bg-red-50', 'border-red-200');
+            
+            if (type === 'success') {
+                statusBox.classList.add('bg-emerald-50', 'border-emerald-200');
+                statusIcon.className = 'fa-solid fa-circle-check text-emerald-600 mt-0.5';
+            } else if (type === 'warning') {
+                statusBox.classList.add('bg-amber-50', 'border-amber-200');
+                statusIcon.className = 'fa-solid fa-triangle-exclamation text-amber-600 mt-0.5';
+            } else {
+                statusBox.classList.add('bg-red-50', 'border-red-200');
+                statusIcon.className = 'fa-solid fa-circle-xmark text-red-600 mt-0.5';
+            }
 
-      let borderHighlight = 'border-l-4 border-l-brand-500';
-      if (type === 'success') borderHighlight = 'border-l-4 border-l-emerald-500';
-      if (type === 'warning') borderHighlight = 'border-l-4 border-l-amber-500';
-      if (type === 'error') borderHighlight = 'border-l-4 border-l-rose-500';
-
-      toast.className += ` ${borderHighlight}`;
-
-      const iconHTML = iconUrl
-        ? `<img src="${iconUrl}" class="w-10 h-10 rounded-lg object-cover shrink-0 border border-slate-700" onerror="this.src='https://via.placeholder.com/40'" />`
-        : `<div class="w-10 h-10 rounded-lg bg-slate-800 text-brand-400 flex items-center justify-center shrink-0 border border-slate-700"><i class="fa-solid fa-bell"></i></div>`;
-
-      toast.innerHTML = `
-        ${iconHTML}
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center justify-between">
-            <h4 class="text-sm font-semibold text-white truncate">${title}</h4>
-            <button onclick="this.closest('.toast-animate').remove()" class="text-slate-400 hover:text-slate-200 text-xs">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-          </div>
-          <p class="text-xs text-slate-300 mt-0.5 line-clamp-2">${message}</p>
-        </div>
-      `;
-
-      container.appendChild(toast);
-
-      // Auto remove after 5 seconds
-      setTimeout(() => {
-        if (toast.parentNode) {
-          toast.style.opacity = '0';
-          toast.style.transform = 'translateY(-10px)';
-          toast.style.transition = 'all 0.3s ease';
-          setTimeout(() => toast.remove(), 300);
+            statusTitle.textContent = title;
+            statusDesc.textContent = message;
         }
-      }, 5000);
-    }
 
-    // --- Logging System ---
-    function addLogEntry(title, type, status, timestamp) {
-      const emptyState = document.getElementById('emptyLogState');
-      if (emptyState) emptyState.remove();
+        // Update Header Badge Status
+        function updateBadge(text, bgClass, textClass) {
+            permissionBadge.className = `px-3 py-1 rounded-full text-xs font-semibold ${bgClass} ${textClass} shadow-sm`;
+            permissionBadge.innerHTML = text;
+        }
 
-      const logContainer = document.getElementById('logContainer');
+        // Request Explicit Permission
+        function requestNotificationPermission() {
+            if (!("Notification" in window)) return;
 
-      let badgeStyle = 'bg-slate-800 text-slate-300 border-slate-700';
-      if (status === 'success') badgeStyle = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
-      if (status === 'warning') badgeStyle = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
-      if (status === 'error') badgeStyle = 'bg-rose-500/10 text-rose-400 border-rose-500/30';
+            Notification.requestPermission().then(permission => {
+                checkNotificationSupport();
+            });
+        }
 
-      const entry = document.createElement('div');
-      entry.className = 'bg-slate-900/80 border border-slate-800 rounded-lg p-2.5 text-xs flex items-center justify-between gap-2';
+        // Trigger Browser Notification
+        function sendNotification() {
+            if (!("Notification" in window)) {
+                alert("आपका ब्राउज़र नोटिफिकेशन का समर्थन नहीं करता है।");
+                return;
+            }
 
-      entry.innerHTML = `
-        <div class="flex items-center gap-2 truncate">
-          <span class="px-2 py-0.5 rounded border ${badgeStyle} text-[10px] font-medium shrink-0">${type}</span>
-          <span class="text-slate-200 font-medium truncate">${title}</span>
-        </div>
-        <span class="text-[10px] text-slate-500 shrink-0">${timestamp}</span>
-      `;
+            if (Notification.permission === "granted") {
+                triggerNativeNotification();
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        triggerNativeNotification();
+                    } else {
+                        checkNotificationSupport();
+                    }
+                });
+            } else {
+                alert("नोटिफिकेशन की अनुमति ब्लॉक है। कृपया ब्राउज़र सेटिंग्स से इसे 'Allow' करें।");
+            }
+        }
 
-      logContainer.prepend(entry);
-    }
+        // Helper to Create Native Notification
+        function triggerNativeNotification() {
+            const title = titleInput.value.trim() || 'टेस्ट नोटिफिकेशन';
+            const options = {
+                body: bodyInput.value.trim() || '',
+                icon: iconInput.value.trim() || 'https://cdn-icons-png.flaticon.com/512/3119/3119338.png',
+                badge: iconInput.value.trim() || '',
+                dir: 'auto'
+            };
 
-    function clearLogs() {
-      const logContainer = document.getElementById('logContainer');
-      logContainer.innerHTML = `
-        <div id="emptyLogState" class="text-center py-8 text-slate-500 text-xs">
-          <i class="fa-solid fa-clock-rotate-left text-2xl mb-2 text-slate-600 block"></i>
-          No notifications triggered yet.
-        </div>
-      `;
-    }
-  </script>
+            try {
+                const notification = new Notification(title, options);
+
+                notification.onclick = function(event) {
+                    event.preventDefault();
+                    window.focus();
+                    notification.close();
+                };
+            } catch (err) {
+                console.error('Notification creation failed:', err);
+                alert('नोटिफिकेशन भेजने में समस्या आई। कृपया इमेज URL जांचें।');
+            }
+        }
+
+        // Presets Helper
+        function applyPreset(type) {
+            if (type === 'msg') {
+                titleInput.value = 'राहुल कुमार का संदेश';
+                bodyInput.value = 'नमस्ते! क्या आप आज की मीटिंग के लिए तैयार हैं?';
+                iconInput.value = 'https://cdn-icons-png.flaticon.com/512/4140/4140048.png';
+            } else if (type === 'offer') {
+                titleInput.value = '🔥 50% की विशेष छूट!';
+                bodyInput.value = 'आज ही खरीदारी करें और सभी प्रोडक्ट्स पर 50% तक बचाएं।';
+                iconInput.value = 'https://cdn-icons-png.flaticon.com/512/726/726476.png';
+            } else if (type === 'alert') {
+                titleInput.value = 'सुरक्षा चेतावनी';
+                bodyInput.value = 'एक नए डिवाइस से आपके खाते में लॉगिन किया गया है।';
+                iconInput.value = 'https://cdn-icons-png.flaticon.com/512/564/564619.png';
+            }
+            updatePreview();
+        }
+
+        // Initializing Check on Load
+        window.onload = function() {
+            checkNotificationSupport();
+            updatePreview();
+        };
+    </script>
 </body>
 </html>
